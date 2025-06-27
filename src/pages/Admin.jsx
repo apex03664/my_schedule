@@ -1,8 +1,5 @@
 import { useState } from 'react';
 import { FiUsers, FiSettings, FiCalendar, FiFileText } from 'react-icons/fi';
-import Dashboardpage from '../components/Dashboardpage';
-import SettingsPage from '../components/SettingsPage';
-import AccountPage from '../components/AccountPage';
 
 const Sidebar = ({ activePage, setActivePage }) => (
   <aside className="bg-[#111] text-white w-64 min-h-screen p-5">
@@ -72,13 +69,17 @@ const ContactsPage = () => {
   );
 };
 
- 
+const DashboardPage = () => <div className="p-6 text-white">📊 <strong>Dashboard:</strong> Overview, stats, charts here...</div>;
+const PagesPage = () => <div className="p-6 text-white">📄 <strong>Pages:</strong> Manage landing pages, blogs, info content...</div>;
+const SettingsPage = () => <div className="p-6 text-white">⚙️ <strong>Settings:</strong> App preferences, integrations, etc.</div>;
+const AccountPage = () => <div className="p-6 text-white">👤 <strong>Account:</strong> Profile info, password change, logout...</div>;
+
 const Admin = () => {
   const [activePage, setActivePage] = useState('contacts');
 
   const renderPage = () => {
     switch (activePage) {
-      case 'dashboard': return <Dashboardpage />;
+      case 'dashboard': return <DashboardPage />;
       case 'contacts': return <ContactsPage />;
       case 'pages': return <PagesPage />;
       case 'settings': return <SettingsPage />;
