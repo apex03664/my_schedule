@@ -1,9 +1,6 @@
 import { useState } from 'react';
-import { useEffect } from 'react';
-import { gapi } from 'gapi-script';
+  import { bookAppointment } from './../../apis/apis'; // Make sure this is imported
 
-const CLIENT_ID = '827753309559-8221tcmudchmjlbnl8da2qmoo2dqlp5j.apps.googleusercontent.com';
-const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
 
 const BookingForm = () => {
   const today = new Date();
@@ -20,18 +17,7 @@ const BookingForm = () => {
     parentConfirmed: false,
   });
 
-
-  useEffect(() => {
-    const initClient = () => {
-      gapi.client.init({
-        clientId: CLIENT_ID,
-        scope: SCOPES,
-      });
-    };
-
-    gapi.load('client:auth2', initClient);
-  }, []);
-
+ 
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [timezone, setTimezone] = useState('Asia/Kolkata');
@@ -50,82 +36,50 @@ const BookingForm = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ 
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const newAppointment = {
-      ...form,
-      date: selectedDate,
-      time: selectedTime,
-      timezone,
-      createdAt: new Date().toISOString(),
-    };
+  if (!selectedDate || !selectedTime) {
+    alert('Please select a date and time.');
+    return;
+  }
 
-    // Generate GMeet link via Calendar
-    const meetLink = await createCalendarEvent(newAppointment);
-    newAppointment.meetLink = meetLink;
-    console.log(meetLink);
-
-    const storedAppointments = JSON.parse(localStorage.getItem('appointments')) || [];
-    storedAppointments.push(newAppointment);
-    localStorage.setItem('appointments', JSON.stringify(storedAppointments));
-
-    console.log('Saved appointment:', newAppointment);
-
-    setForm({ name: '', email: '', phone: '' });
-    setSelectedDate(null);
-    setSelectedTime('');
-    setShowForm(false);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+  const bookingData = {
+    name: form.name,
+    email: form.email,
+    phone: form.phone,
+    location: form.location,
+    grade: form.grade,
+    countryCode: form.countryCode || '+91',
+    date: selectedDate.toISOString().split('T')[0], // format to YYYY-MM-DD
+    time: selectedTime,
   };
-  const createCalendarEvent = async (appointment) => {
-    try {
-      const isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
 
-      if (!isSignedIn) {
-        await gapi.auth2.getAuthInstance().signIn();
-      }
-
-      const event = {
-        summary: `Counselling: ${appointment.name}`,
-        location: appointment.location,
-        description: `Counselling session with ${appointment.name}`,
-        start: {
-          dateTime: new Date(`${appointment.date.toDateString()} ${appointment.time}`).toISOString(),
-          timeZone: appointment.timezone,
-        },
-        end: {
-          dateTime: new Date(
-            new Date(`${appointment.date.toDateString()} ${appointment.time}`).getTime() + 60 * 60 * 1000
-          ).toISOString(),
-          timeZone: appointment.timezone,
-        },
-        attendees: [{ email: appointment.email }],
-        conferenceData: {
-          createRequest: {
-            requestId: `esro-${Date.now()}`,
-            conferenceSolutionKey: {
-              type: 'hangoutsMeet',
-            },
-          },
-        },
-      };
-
-      const request = gapi.client.calendar.events.insert({
-        calendarId: 'primary',
-        resource: event,
-        conferenceDataVersion: 1,
+  try {
+    const response = await bookAppointment(bookingData);
+    if (response.success || response._id) {
+      setShowSuccess(true);
+      setShowForm(false);
+      setForm({
+        name: '',
+        email: '',
+        phone: '',
+        location: '',
+        grade: '',
+        countryCode: '+91',
+        parentConfirmed: false,
       });
-
-      const response = await request.execute();
-      console.log('📅 Google Meet Created:', response?.hangoutLink || response?.htmlLink);
-      return response?.hangoutLink || '';
-    } catch (err) {
-      console.error('Google Calendar error:', err);
-      return '';
+      setSelectedDate(null);
+      setSelectedTime('');
+    } else {
+      alert('Booking failed. Please try again.');
     }
-  };
+  } catch (error) {
+    console.error('Error booking appointment:', error);
+    alert('Something went wrong while booking. Please try again.');
+  }
+};
 
 
   const currentMonthDays = getMonthDays(currentYear, currentMonth);
