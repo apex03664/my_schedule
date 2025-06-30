@@ -34,8 +34,12 @@ const RegistrationForm = ({
       className="col-span-3 datetime-container-e  border border-gray-700 rounded-2xl bg-black text-white rounded-none md:rounded-r-2xl p-6 space-y-6 transition-all relative"
     >
       {isSubmitting && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[9999]">
-          <ClipLoader color="#ffffff" size={50} />
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[9999]">
+          <div className="space-loader">
+            <div className="rocket" />
+            <div className="exhaust-flame" />
+            <div className="exhaust-fumes" />
+          </div>
         </div>
       )}
 
@@ -130,6 +134,24 @@ const RegistrationForm = ({
               className="w-2/3 px-4 py-2 border border-gray-700 rounded bg-black text-white focus:outline-none"
             />
           </div>
+        </div>
+        {/* Batch No */}
+        <div>
+          <label className="block font-semibold mb-1">
+            Batch No <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="batchNo"
+            required
+            value={form.batchNo || ""}
+            onChange={(e) => setForm({ ...form, batchNo: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-700 rounded bg-black text-white focus:outline-none"
+          >
+            <option value="" disabled>Select Batch No</option>
+            <option value="93">Batch 93</option>
+            <option value="92">Batch 92</option>
+            <option value="91">Batch 91</option>
+          </select>
         </div>
 
         {/* Location */}

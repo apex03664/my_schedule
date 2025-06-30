@@ -16,11 +16,12 @@ const DateTimeSelector = ({
   timeSlots,
   setShowForm,
 }) => {
+  
   return (
     <div className="bg-black text-white rounded-3xl p-6 shadow-xl datetime-container  border border-gray-700 rounded-2xl transition-all   ">
       {/* Side Panel */}
       <div className="w-full md:w-1/3 flex b-2 b flex-col gap-4">
-        <img src="https://img.flexifunnels.com/images/4337/i2njq_776_WhatsAppImage20230920at17.44.38.jpeg" alt="Logo" className="w-12 h-12 rounded-full" />
+        <img src="https://img.flexifunnels.com/images/4337/i2njq_776_WhatsAppImage20230920at17.44.38.jpeg" alt="Logo" className="w-20 h-20 rounded-full" />
         <div>
           <h2 className="text-xl font-bold">Space Career Launch Pad- UPI PAID</h2>
           <p className="text-gray-400 text-sm mt-2">
@@ -33,12 +34,12 @@ const DateTimeSelector = ({
       {/* Calendar Section */}
       <div className="w-full w-full md:w-1/3 ">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold">Select a Date & Time</h3>
+          <h3 className="text-sm font-bold">Select a Date & Time</h3>
           <div className="flex items-center gap-2">
             <select
               value={timezone}
               onChange={(e) => setTimezone(e.target.value)}
-              className="bg-black border border-gray-700 px-3 py-1 rounded-md text-sm"
+              className="bg-black border border-gray-700 px-1 py-1 rounded-md text-xs"
             >
               <option value="Asia/Kolkata">GMT+05:30 🇮🇳</option>
               <option value="America/New_York">GMT-04:00 🇺🇸</option>
@@ -113,8 +114,8 @@ const DateTimeSelector = ({
       </div>
 
       {/* Time Slots Section */}
-      <div className="w-full w-full md:w-1/3">
-        <div className="mb-4 text-sm text-gray-400">
+      <div className="w-full  md:w-1/3">
+        <div className="mb-4 text-base  text-gray-400">
           Selected:
           <span className="text-white font-semibold">
             {selectedDate?.toLocaleDateString("en-GB")} at {selectedTime}
@@ -126,7 +127,7 @@ const DateTimeSelector = ({
           <span className="bg-gray-800 px-3 py-1 rounded-full">24h</span>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 flex  items-center flex-col">
           {timeSlots.length > 0 ? (
             timeSlots.map((slot) => (
               <button
@@ -137,8 +138,8 @@ const DateTimeSelector = ({
                     setShowForm(true);
                   }
                 }}
-                className={`w-full text-left px-4 py-2 rounded-lg border border-gray-700 transition-all flex items-center gap-2 
-                  ${selectedDate
+                className={` py-2 w-full  text-sm rounded-md border border-gray-700 transition-all flex justify-center items-center gap-2
+          ${selectedDate
                     ? selectedTime === slot
                       ? "bg-blue-600 text-white"
                       : "bg-black text-white hover:bg-blue-700"
@@ -149,8 +150,12 @@ const DateTimeSelector = ({
               </button>
             ))
           ) : (
-            <div className="border border-red-600 text-red-500 px-4 py-6 rounded text-center">
-              <p>No slots available on {selectedDate?.toLocaleString("default", { month: "short" })}, {selectedDate?.getFullYear()}</p>
+            <div className="border border-red-600 text-red-500 px-4 py-6 rounded text-center text-sm">
+              <p>
+                No slots available on{" "}
+                {selectedDate?.toLocaleString("default", { month: "short" })},{" "}
+                {selectedDate?.getFullYear()}
+              </p>
               <button
                 onClick={() => {
                   if (currentMonth === 11) {
@@ -160,13 +165,14 @@ const DateTimeSelector = ({
                     setCurrentMonth((prev) => prev + 1);
                   }
                 }}
-                className="mt-2 px-4 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
               >
                 Next month
               </button>
             </div>
           )}
         </div>
+
       </div>
     </div>
   );
