@@ -132,7 +132,7 @@ const BookingForm = () => {
   const timeSlots = ["4:00 PM", "5:30 PM", "7:00 PM", "8:30 PM"];
 
   return (
-<div className="flex items-center justify-center min-h-screen bg-white text-black px-4">
+<div className="flex items-center  justify-center min-h-screen bg-black  text-black px-4">
   <ToastContainer
     position="top-right"
     autoClose={3000}
@@ -144,11 +144,9 @@ const BookingForm = () => {
     pauseOnHover
     theme="colored"
   />
-
-  <div className="w-full max-w-6xl">
-    {/* Conditional rendering of booking UI */}
-    {!showForm ? (
-      <DateTimeSelector
+<div className="w-full max-w-6xl">
+  {!showForm ? (
+       <DateTimeSelector
         timezone={timezone}
         setTimezone={setTimezone}
         currentMonth={currentMonth}
@@ -164,23 +162,21 @@ const BookingForm = () => {
         timeSlots={timeSlots}
         setShowForm={setShowForm}
       />
-    ) : (
-      <div className="min-h-screen bg-black text-white px-4 py-8 md:px-10 flex items-center justify-center">
-        <div className="w-full max-w-6xl bg-[#0e0e0e] rounded-2xl overflow-hidden shadow-2xl">
-          <RegistrationForm
-            form={form}
-            setForm={setForm}
-            selectedDate={selectedDate}
-            selectedTime={selectedTime}
-            getOneHourLater={getOneHourLater}
-            setShowForm={setShowForm}
-            handleSubmit={handleSubmit}
-            handleChange={handleChange}
-          />
-        </div>
-      </div>
-    )}
-  </div>
+   ) : (
+    <div className="min-h-screen bg-black text-white px-4 py-8 md:px-10 flex items-center justify-center">
+         <RegistrationForm
+          form={form}
+          setForm={setForm}
+          selectedDate={selectedDate}
+          selectedTime={selectedTime}
+          getOneHourLater={getOneHourLater}
+          setShowForm={setShowForm}
+          handleSubmit={handleSubmit}
+          handleChange={handleChange}
+        />
+     </div>
+  )}
+</div>
 
   {showSuccess && (
     <SuccessModal

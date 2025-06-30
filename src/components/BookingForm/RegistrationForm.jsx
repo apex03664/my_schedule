@@ -31,7 +31,7 @@ const RegistrationForm = ({
   return (
     <form
       onSubmit={onSubmit}
-      className="col-span-3 bg-black text-white rounded-none md:rounded-r-2xl p-6 space-y-6 transition-all relative"
+      className="col-span-3 datetime-container-e  border border-gray-700 rounded-2xl bg-black text-white rounded-none md:rounded-r-2xl p-6 space-y-6 transition-all relative"
     >
       {isSubmitting && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[9999]">

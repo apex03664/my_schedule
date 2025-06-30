@@ -1,3 +1,41 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+.datetime-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  background-color: #000000;
+  color: white;
+  border-radius: 24px;
+  border: 2px solid #f5f5f5; /* subtle border inside glow */
+  box-shadow: 0 0 20px #8e92f1, 0 0 0px #8e92f1 inset;
+  transition: box-shadow 0.5s ease-in-out;
+}
+.datetime-container-e {
+   flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  background-color: #000000;
+  color: white;
+  border-radius: 24px;
+  border: 2px solid #f5f5f5; /* subtle border inside glow */
+  box-shadow: 0 0 20px #8e92f1, 0 0 0px #8e92f1 inset;
+  transition: box-shadow 0.5s ease-in-out;
+}
+
+/* Responsive row layout for large screens */
+@media (min-width: 1024px) {
+  .datetime-container {
+    flex-direction: row;
+  }
+}
+
+/* Optional hover effect for stronger glow */
+.datetime-container:hover {
+  box-shadow: 0 0 35px #aab0ff, 0 0 00px #aab0ff inset;
+}
+.datetime-container-e:hover {
+  box-shadow: 0 0 35px #aab0ff, 0 0 00px #aab0ff inset;
+}

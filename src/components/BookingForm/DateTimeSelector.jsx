@@ -17,9 +17,9 @@ const DateTimeSelector = ({
   setShowForm,
 }) => {
   return (
-    <div className="bg-black text-white rounded-3xl p-6 shadow-xl transition-all flex flex-row gap-6 lg:flex-row">
+    <div className="bg-black text-white rounded-3xl p-6 shadow-xl datetime-container  border border-gray-700 rounded-2xl transition-all   ">
       {/* Side Panel */}
-      <div className="w-full lg:w-1/3 flex flex-col gap-4">
+      <div className="w-full md:w-1/3 flex b-2 b flex-col gap-4">
         <img src="https://img.flexifunnels.com/images/4337/i2njq_776_WhatsAppImage20230920at17.44.38.jpeg" alt="Logo" className="w-12 h-12 rounded-full" />
         <div>
           <h2 className="text-xl font-bold">Space Career Launch Pad- UPI PAID</h2>
@@ -31,7 +31,7 @@ const DateTimeSelector = ({
       </div>
 
       {/* Calendar Section */}
-      <div className="w-full lg:w-1/3">
+      <div className="w-full w-full md:w-1/3 ">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold">Select a Date & Time</h3>
           <div className="flex items-center gap-2">
@@ -113,7 +113,7 @@ const DateTimeSelector = ({
       </div>
 
       {/* Time Slots Section */}
-      <div className="w-full lg:w-1/3">
+      <div className="w-full w-full md:w-1/3">
         <div className="mb-4 text-sm text-gray-400">
           Selected:
           <span className="text-white font-semibold">
