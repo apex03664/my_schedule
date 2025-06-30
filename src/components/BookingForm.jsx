@@ -37,6 +37,30 @@ const BookingForm = () => {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+function getOneHourLater(timeStr) {
+  if (!timeStr) return "";
+
+  const [time, modifier] = timeStr.split(" ");
+  let [hours, minutes] = time.split(":").map(Number);
+
+  if (modifier === "PM" && hours !== 12) hours += 12;
+  if (modifier === "AM" && hours === 12) hours = 0;
+
+  const date = new Date();
+  date.setHours(hours);
+  date.setMinutes(minutes);
+  date.setSeconds(0);
+
+  // Add one hour
+  date.setHours(date.getHours() + 1);
+
+  const newHours = date.getHours();
+  const newMinutes = date.getMinutes().toString().padStart(2, "0");
+  const newModifier = newHours >= 12 ? "PM" : "AM";
+  const formattedHours = newHours % 12 === 0 ? 12 : newHours % 12;
+
+  return `${formattedHours}:${newMinutes} ${newModifier}`;
+}
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -97,7 +121,7 @@ const BookingForm = () => {
   };
 
   const currentMonthDays = getMonthDays(currentYear, currentMonth);
-  const timeSlots = ["2:00 PM", "4:00 PM", "6:00 PM", "8:00 PM"];
+  const timeSlots = ["4:00 PM", "5:30 PM", "7:00 PM", "8:30 PM"];
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-white text-black px-4">
@@ -173,12 +197,12 @@ const BookingForm = () => {
                   <option value="Asia/Dubai">GMT+04:00 🇦🇪</option>
                 </select>
 
-                <select
+                <div
                   className="bg-black border border-gray-700 px-3 py-1 rounded-md text-sm"
                   disabled
                 >
                   <option>60m</option>
-                </select>
+                </div>
               </div>
             </div>
 
@@ -248,13 +272,12 @@ const BookingForm = () => {
                         disabled={isPast}
                         onClick={() => !isPast && setSelectedDate(day)}
                         className={`text-sm font-medium px-4 py-2 rounded-xl transition-all duration-200 
-              ${
-                isPast
-                  ? "bg-gray-900 text-gray-600 cursor-not-allowed"
-                  : isSelected
-                  ? "bg-white text-black font-bold"
-                  : "bg-gray-800 text-white hover:bg-white hover:text-black"
-              }`}
+              ${isPast
+                            ? "bg-gray-900 text-gray-600 cursor-not-allowed"
+                            : isSelected
+                              ? "bg-white text-black font-bold"
+                              : "bg-gray-800 text-white hover:bg-white hover:text-black"
+                          }`}
                       >
                         {day.getDate()}
                       </button>
@@ -266,7 +289,7 @@ const BookingForm = () => {
               {/* Time Slots Section */}
               <div className="w-full md:w-1/3">
                 <div className="mb-4 text-sm text-gray-400">
-                  Selected:{" "}
+                  Selected:
                   <span className="text-white font-semibold">
                     {selectedDate?.toLocaleDateString("en-GB")} at{" "}
                     {selectedTime}
@@ -295,13 +318,12 @@ const BookingForm = () => {
                         }
                       }}
                       className={`w-full text-left px-4 py-2 rounded-lg border border-gray-700 transition-all flex items-center gap-2 
-            ${
-              selectedDate
-                ? selectedTime === slot
-                  ? "bg-blue-600 text-white"
-                  : "bg-black text-white hover:bg-blue-700"
-                : "opacity-50 cursor-not-allowed"
-            }`}
+            ${selectedDate
+                          ? selectedTime === slot
+                            ? "bg-blue-600 text-white"
+                            : "bg-black text-white hover:bg-blue-700"
+                          : "opacity-50 cursor-not-allowed"
+                        }`}
                     >
                       <span className="w-2 h-2 bg-green-400 rounded-full inline-block"></span>
                       {slot}
@@ -356,20 +378,30 @@ const BookingForm = () => {
               >
                 <h3 className="text-xl font-bold mb-4">Registration</h3>
 
-                <div className="mb-4">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-white text-black font-bold px-3 py-2 rounded-lg text-center">
-                      <div className="text-sm leading-none">JUN</div>
-                      <div className="text-2xl">30</div>
+                <div className="flex items-center gap-4">
+                  <div className="bg-white text-black font-bold px-3 py-2 rounded-lg text-center">
+                    <div className="text-sm leading-none">
+                      {selectedDate?.toLocaleString("en-US", { month: "short" }).toUpperCase()}
                     </div>
-                    <div>
-                      <div className="font-medium">Monday, 30 June</div>
-                      <div className="text-sm text-gray-400">
-                        8:30 PM – 9:30 PM (GMT+5:30)
-                      </div>
+                    <div className="text-2xl">
+                      {selectedDate?.getDate()}
                     </div>
                   </div>
+                  <div>
+                    <div className="font-medium">
+                      {selectedDate?.toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+  })}
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      {selectedTime} – {getOneHourLater(selectedTime)}
+                    </div>
+
+                  </div>
                 </div>
+
 
                 {/* Name */}
                 <div>
@@ -520,14 +552,13 @@ const BookingForm = () => {
                       !form.grade ||
                       !form.parentConfirmed
                     }
-                    className={`px-6 py-2 rounded-lg transition font-semibold ${
-                      !form.name ||
+                    className={`px-6 py-2 rounded-lg transition font-semibold ${!form.name ||
                       !form.location ||
                       !form.grade ||
                       !form.parentConfirmed
-                        ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700 text-white"
-                    }`}
+                      ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
+                      }`}
                   >
                     ✅ Confirm Booking
                   </button>
