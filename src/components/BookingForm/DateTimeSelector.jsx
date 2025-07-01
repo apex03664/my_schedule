@@ -86,30 +86,35 @@ const DateTimeSelector = ({
           {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
             <div key={d} className="text-sm text-gray-400 font-semibold">{d}</div>
           ))}
-          {currentMonthDays.map((day) => {
-            const isPast = day < today;
-            const isSelected =
-              selectedDate &&
-              day.getDate() === selectedDate.getDate() &&
-              day.getMonth() === selectedDate.getMonth() &&
-              day.getFullYear() === selectedDate.getFullYear();
+         {currentMonthDays.map((day, index) => {
+  if (day === null) {
+    return <div key={index} className="py-2" />; // empty cell for padding
+  }
 
-            return (
-              <button
-                key={day.toISOString()}
-                disabled={isPast}
-                onClick={() => !isPast && setSelectedDate(day)}
-                className={`text-sm font-medium px-4 py-2 rounded-xl transition-all duration-200 
-                  ${isPast
-                    ? "bg-gray-900 text-gray-600 cursor-not-allowed"
-                    : isSelected
-                      ? "bg-white text-black font-bold"
-                      : "bg-gray-800 text-white hover:bg-white hover:text-black"}`}
-              >
-                {day.getDate()}
-              </button>
-            );
-          })}
+  const isPast = day < today.setHours(0, 0, 0, 0);
+  const isSelected =
+    selectedDate &&
+    day.getDate() === selectedDate.getDate() &&
+    day.getMonth() === selectedDate.getMonth() &&
+    day.getFullYear() === selectedDate.getFullYear();
+
+  return (
+    <button
+      key={day.toISOString()}
+      disabled={isPast}
+      onClick={() => !isPast && setSelectedDate(day)}
+      className={`text-sm font-medium px-4 py-2 rounded-xl transition-all duration-200 
+        ${isPast
+          ? "bg-gray-900 text-gray-600 cursor-not-allowed"
+          : isSelected
+            ? "bg-white text-black font-bold"
+            : "bg-gray-800 text-white hover:bg-white hover:text-black"}`}
+    >
+      {day.getDate()}
+    </button>
+  );
+})}
+
         </div>
       </div>
 
