@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import rocket from "./rocket.json"
+import { useEffect } from "react";
+import axios from "axios";
+
 import Lottie from "lottie-react";
 const RegistrationForm = ({
   form,
@@ -27,6 +30,48 @@ const RegistrationForm = ({
       setIsSubmitting(false);
     }
   };
+  const detectLocation = async () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          try {
+            const response = await axios.get(
+              `https://nominatim.openstreetmap.org/reverse`,
+              {
+                params: {
+                  format: "json",
+                  lat: latitude,
+                  lon: longitude,
+                },
+              }
+            );
+            const { address } = response.data;
+            const city = address.city || address.town || address.village || "";
+            const state = address.state || "";
+            const locationString = `${city}, ${state}`;
+            setForm((prevForm) => ({ ...prevForm, location: locationString }));
+          } catch (error) {
+            console.error("Error fetching location:", error);
+            alert("❌ Couldn't detect location. Please try again.");
+          }
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          alert("❌ Location access denied. Please allow GPS or try again.");
+        }
+      );
+    } else {
+      alert("❌ Geolocation not supported by your browser.");
+    }
+  };
+
+  useEffect(() => {
+    if (!form.location) {
+      detectLocation();
+    }
+  }, []);
+
 
   return (
     <form
@@ -38,9 +83,9 @@ const RegistrationForm = ({
           <Lottie animationData={rocket} style={{ width: 500 }} />
           <div className="text-white text-lg font-semibold mt-4">
             Booking in progress...
-            </div>
+          </div>
         </div>
-      )} 
+      )}
 
       <h3 className="text-xl font-bold mb-4">Registration</h3>
 
@@ -160,19 +205,28 @@ const RegistrationForm = ({
         {/* Location */}
         <div>
           <label className="block font-semibold mb-1">
-            What is your City & State Name?{" "}
-            <span className="text-red-500">*</span>
+            What is your City & State Name? <span className="text-red-500">*</span>
           </label>
-          <input
-            type="text"
-            name="location"
-            placeholder="City & State"
-            value={form.location || ""}
-            onChange={(e) => setForm({ ...form, location: e.target.value })}
-            required
-            className="w-full px-4 py-2 border border-gray-700 rounded bg-black text-white focus:outline-none"
-          />
+          <div className="flex gap-2">
+            <input
+              type="text"
+              name="location"
+              placeholder="City & State"
+              value={form.location || ""}
+              onChange={(e) => setForm({ ...form, location: e.target.value })}
+              required
+              className="w-full px-4 py-2 border border-gray-700 rounded bg-black text-white focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={detectLocation}
+              className="whitespace-nowrap px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white hover:bg-gray-700"
+            >
+             Detect
+            </button>
+          </div>
         </div>
+
 
         {/* Grade */}
         <div>
@@ -239,15 +293,14 @@ const RegistrationForm = ({
               !form.parentConfirmed ||
               isSubmitting
             }
-            className={`px-6 py-2 rounded font-semibold ${
-              !form.name ||
+            className={`px-6 py-2 rounded font-semibold ${!form.name ||
               !form.location ||
               !form.grade ||
               !form.parentConfirmed ||
               isSubmitting
-                ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 text-white"
-            }`}
+              ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
           >
             ✅ Confirm Booking
           </button>
