@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { bookAppointment } from "./../../apis/apis";
+import { bookAppointment, getSlotConfig } from "./../../apis/apis";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SuccessModal from "./BookingForm/SuccessModel";
@@ -11,6 +11,8 @@ const BookingForm = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [dateSlotMap, setDateSlotMap] = useState({});
+
   const [gmeet, setGMeet] = useState("");
   const [form, setForm] = useState({
     name: "",
@@ -144,6 +146,22 @@ const BookingForm = () => {
   useEffect(() => {
     setCurrentMonthDays(generateMonthDays(currentYear, currentMonth));
   }, [currentMonth, currentYear]);
+  useEffect(() => {
+    const fetchSlotConfig = async () => {
+      try {
+        const data = await getSlotConfig();
+        const map = {};
+        data.forEach(({ date, slots }) => {
+          map[date] = slots;
+        });
+        setDateSlotMap(map);
+      } catch (err) {
+        console.error("❌ Failed to fetch slots:", err);
+      }
+    };
+
+    fetchSlotConfig();
+  }, []);
 
   const timeSlots = ["4:00 PM", "5:30 PM", "7:00 PM", "8:30 PM"];
 
@@ -164,6 +182,7 @@ const BookingForm = () => {
         {!showForm ? (
           <DateTimeSelector
             timezone={timezone}
+            dateSlotMap={dateSlotMap} // ✅ added
             setTimezone={setTimezone}
             currentMonth={currentMonth}
             setCurrentMonth={setCurrentMonth}
@@ -175,7 +194,11 @@ const BookingForm = () => {
             setSelectedDate={setSelectedDate}
             selectedTime={selectedTime}
             setSelectedTime={setSelectedTime}
-            timeSlots={timeSlots}
+            timeSlots={
+              selectedDate
+                ? dateSlotMap[selectedDate.toISOString().split("T")[0]] || []
+                : []
+            }
             setShowForm={setShowForm}
           />
         ) : (

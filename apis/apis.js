@@ -13,6 +13,11 @@ export const getAllBookings = async () => {
     throw err.response?.data || { message: "Failed to fetch bookings" };
   }
 };
+// ✅ Add this function if not already present
+export const getSlotConfig = async () => {
+  const response = await axios.get(`${BASE_URL}/admin/config/slots`);
+  return response.data; // should return [{ date: "2025-07-22", slots: [...] }, ...]
+};
 
 // Cancel a booking by ID
 export const cancelBooking = async (bookingId) => {

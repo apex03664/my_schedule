@@ -9,6 +9,7 @@ const DateTimeSelector = ({
   setCurrentYear,
   currentMonthDays,
   today,
+  dateSlotMap,
   selectedDate,
   setSelectedDate,
   selectedTime,
@@ -16,19 +17,29 @@ const DateTimeSelector = ({
   timeSlots,
   setShowForm,
 }) => {
-  
   return (
     <div className="bg-black text-white rounded-3xl p-6 shadow-xl datetime-container  border border-gray-700 rounded-2xl transition-all   ">
       {/* Side Panel */}
       <div className="w-full md:w-1/3 flex b-2 b flex-col gap-4">
-        <img src="https://img.flexifunnels.com/images/4337/i2njq_776_WhatsAppImage20230920at17.44.38.jpeg" alt="Logo" className="w-20 h-20 rounded-full" />
+        <img
+          src="https://img.flexifunnels.com/images/4337/i2njq_776_WhatsAppImage20230920at17.44.38.jpeg"
+          alt="Logo"
+          className="w-20 h-20 rounded-full"
+        />
         <div>
-          <h2 className="text-xl font-bold">Space Career Launch Pad- UPI PAID</h2>
+          <h2 className="text-xl font-bold">
+            Space Career Launch Pad- UPI PAID
+          </h2>
           <p className="text-gray-400 text-sm mt-2">
-            Set your Counselling appointment to be the part of SUPER1000 Jr Space Scientist Program. How your child can become the scientist, astronaut & research person in the field of Space Science and technology. Both...
+            Set your Counselling appointment to be the part of SUPER1000 Jr
+            Space Scientist Program. How your child can become the scientist,
+            astronaut & research person in the field of Space Science and
+            technology. Both...
           </p>
         </div>
-        <div className="bg-gray-800 px-3 py-1 rounded-full text-sm w-fit">1 hour</div>
+        <div className="bg-gray-800 px-3 py-1 rounded-full text-sm w-fit">
+          1 hour
+        </div>
       </div>
 
       {/* Calendar Section */}
@@ -46,7 +57,9 @@ const DateTimeSelector = ({
               <option value="Europe/London">GMT+01:00 🇬🇧</option>
               <option value="Asia/Dubai">GMT+04:00 🇦🇪</option>
             </select>
-            <div className="bg-black border border-gray-700 px-3 py-1 rounded-md text-sm">60m</div>
+            <div className="bg-black border border-gray-700 px-3 py-1 rounded-md text-sm">
+              60m
+            </div>
           </div>
         </div>
 
@@ -65,7 +78,10 @@ const DateTimeSelector = ({
             ←
           </button>
           <div className="text-lg font-semibold">
-            {new Date(currentYear, currentMonth).toLocaleString("default", { month: "long" })} {currentYear}
+            {new Date(currentYear, currentMonth).toLocaleString("default", {
+              month: "long",
+            })}{" "}
+            {currentYear}
           </div>
           <button
             onClick={() => {
@@ -84,37 +100,47 @@ const DateTimeSelector = ({
 
         <div className="grid grid-cols-7 gap-2 text-center">
           {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
-            <div key={d} className="text-sm text-gray-400 font-semibold">{d}</div>
+            <div key={d} className="text-sm text-gray-400 font-semibold">
+              {d}
+            </div>
           ))}
-         {currentMonthDays.map((day, index) => {
-  if (day === null) {
-    return <div key={index} className="py-2" />; // empty cell for padding
-  }
+          {currentMonthDays.map((day, index) => {
+            if (day === null) {
+              return <div key={index} className="py-2" />;
+            }
 
-  const isPast = day < today.setHours(0, 0, 0, 0);
-  const isSelected =
-    selectedDate &&
-    day.getDate() === selectedDate.getDate() &&
-    day.getMonth() === selectedDate.getMonth() &&
-    day.getFullYear() === selectedDate.getFullYear();
+            const formattedDate = day.toISOString().split("T")[0];
+            const hasSlot = !!dateSlotMap[formattedDate];
 
-  return (
-    <button
-      key={day.toISOString()}
-      disabled={isPast}
-      onClick={() => !isPast && setSelectedDate(day)}
-      className={`text-sm font-medium px-4 py-2 rounded-xl transition-all duration-200 
-        ${isPast
-          ? "bg-gray-900 text-gray-600 cursor-not-allowed"
-          : isSelected
+            const isPast = day < new Date().setHours(0, 0, 0, 0);
+            const isSelected =
+              selectedDate &&
+              day.getDate() === selectedDate.getDate() &&
+              day.getMonth() === selectedDate.getMonth() &&
+              day.getFullYear() === selectedDate.getFullYear();
+
+            const isClickable = hasSlot && !isPast;
+
+            return (
+              <button
+                key={formattedDate}
+                disabled={!isClickable}
+                onClick={() => {
+                  if (isClickable) setSelectedDate(day);
+                }}
+                className={`text-sm font-medium px-4 py-2 rounded-xl transition-all duration-200
+        ${
+          isSelected
             ? "bg-white text-black font-bold"
-            : "bg-gray-800 text-white hover:bg-white hover:text-black"}`}
-    >
-      {day.getDate()}
-    </button>
-  );
-})}
-
+            : isClickable
+            ? "bg-blue-700 text-white hover:bg-white hover:text-black"
+            : "bg-gray-900 text-gray-600 cursor-not-allowed opacity-50"
+        }`}
+              >
+                {day.getDate()}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -144,11 +170,13 @@ const DateTimeSelector = ({
                   }
                 }}
                 className={` py-2 w-full  text-sm rounded-md border border-gray-700 transition-all flex justify-center items-center gap-2
-          ${selectedDate
-                    ? selectedTime === slot
-                      ? "bg-blue-600 text-white"
-                      : "bg-black text-white hover:bg-blue-700"
-                    : "opacity-50 cursor-not-allowed"}`}
+          ${
+            selectedDate
+              ? selectedTime === slot
+                ? "bg-blue-600 text-white"
+                : "bg-black text-white hover:bg-blue-700"
+              : "opacity-50 cursor-not-allowed"
+          }`}
               >
                 <span className="w-2 h-2 bg-green-400 rounded-full inline-block"></span>
                 {slot}
@@ -177,7 +205,6 @@ const DateTimeSelector = ({
             </div>
           )}
         </div>
-
       </div>
     </div>
   );
