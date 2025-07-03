@@ -87,6 +87,15 @@ const BookingForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const slotList =
+      dateSlotMap[selectedDate.toISOString().split("T")[0]] || [];
+    const selectedSlotObj = slotList.find((s) => s.time === selectedTime);
+
+    if (!selectedSlotObj) {
+      toast.error("❌ Selected time is invalid");
+      return;
+    }
+
     if (!selectedDate || !selectedTime) {
       toast.error("📅 Please select a date and time.");
       return;
@@ -113,6 +122,8 @@ const BookingForm = () => {
       countryCode: form.countryCode || "+91",
       date: selectedDate.toISOString().split("T")[0],
       time: selectedTime,
+      counselorEmail: selectedSlotObj.counselorEmail,
+      counselorId: selectedSlotObj.counselorId,
     };
 
     try {
@@ -196,9 +207,16 @@ const BookingForm = () => {
             setSelectedTime={setSelectedTime}
             timeSlots={
               selectedDate
-                ? dateSlotMap[selectedDate.toISOString().split("T")[0]] || []
+                ? Array.from(
+                    new Set(
+                      (dateSlotMap[selectedDate.toISOString().split("T")[0]] || []).map(
+                        (slot) => slot.time
+                      )
+                    )
+                  )
                 : []
             }
+            
             setShowForm={setShowForm}
           />
         ) : (
