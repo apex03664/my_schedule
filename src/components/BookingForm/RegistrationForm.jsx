@@ -107,7 +107,7 @@ const RegistrationForm = ({
             })}
           </div>
           <div className="text-sm text-gray-400">
-            {selectedTime} - {getOneHourLater(selectedTime)} (GMT+5:30)
+            {selectedTime}  (GMT+5:30)
           </div>
         </div>
       </div>

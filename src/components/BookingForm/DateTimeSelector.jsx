@@ -185,23 +185,11 @@ const DateTimeSelector = ({
           ) : (
             <div className="border border-red-600 text-red-500 px-4 py-6 rounded text-center text-sm">
               <p>
-                No slots available on{" "}
-                {selectedDate?.toLocaleString("default", { month: "short" })},{" "}
+                No slots selected
+                {selectedDate?.toLocaleString("default", { month: "short" })}
                 {selectedDate?.getFullYear()}
               </p>
-              <button
-                onClick={() => {
-                  if (currentMonth === 11) {
-                    setCurrentMonth(0);
-                    setCurrentYear((prev) => prev + 1);
-                  } else {
-                    setCurrentMonth((prev) => prev + 1);
-                  }
-                }}
-                className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
-              >
-                Next month
-              </button>
+              
             </div>
           )}
         </div>
