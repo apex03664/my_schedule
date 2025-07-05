@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import SuccessModal from "./BookingForm/SuccessModel";
 import RegistrationForm from "./BookingForm/RegistrationForm";
 import DateTimeSelector from "./BookingForm/DateTimeSelector";
+import { format } from "date-fns";
 
 const BookingForm = () => {
   const today = new Date();
@@ -65,9 +66,10 @@ const BookingForm = () => {
       return toast.error("📱 Enter a valid 10-digit mobile number");
     if (!emailValid) return toast.error("📧 Enter a valid email address");
 
-    const dateStr = selectedDate.toISOString().split("T")[0];
+    const dateStr = format(selectedDate, "yyyy-MM-dd");
     const slotList = dateSlotMap[dateStr] || [];
     const selectedSlotObj = slotList.find((s) => s.time === selectedTime);
+    console.log(slotList);
 
     if (!selectedSlotObj) return toast.error("❌ Selected time is invalid");
 
@@ -136,15 +138,13 @@ const BookingForm = () => {
     return days;
   };
 
+  const selectedDateStr = selectedDate
+    ? format(selectedDate, "yyyy-MM-dd")
+    : null;
+
   const timeSlots =
-    selectedDate && dateSlotMap[selectedDate.toISOString().split("T")[0]]
-      ? [
-          ...new Set(
-            dateSlotMap[selectedDate.toISOString().split("T")[0]].map(
-              (s) => s.time
-            )
-          ),
-        ]
+    selectedDateStr && dateSlotMap[selectedDateStr]
+      ? [...new Set(dateSlotMap[selectedDateStr].map((s) => s.time))]
       : [];
 
   return (
@@ -171,6 +171,8 @@ const BookingForm = () => {
           />
         ) : (
           <div className="min-h-screen bg-black text-white px-4 py-8 md:px-10 flex items-center justify-center">
+            {/* DateTimeSelector */}
+
             <RegistrationForm
               form={form}
               setForm={setForm}
