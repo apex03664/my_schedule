@@ -21,9 +21,10 @@ const DateTimeSelector = ({
   const localToday = new Date();
   localToday.setHours(0, 0, 0, 0);
 
+
   return (
-    <div className="bg-black text-white rounded-3xl p-6 shadow-xl datetime-container border border-gray-700 transition-all flex flex-col md:flex-row gap-10">
-      {/* Side Panel */}
+<div className="bg-black text-white rounded-3xl p-10 shadow-2xl datetime-container border border-gray-700 transition-all flex flex-col md:flex-row gap-14">
+{/* Side Panel */}
       <div className="w-full md:w-1/3 flex flex-col gap-4">
         <img
           src="https://img.flexifunnels.com/images/4337/i2njq_776_WhatsAppImage20230920at17.44.38.jpeg"
@@ -155,37 +156,35 @@ const DateTimeSelector = ({
         </div>
 
         <div className="space-y-2 flex items-center flex-col">
-          {timeSlots.length > 0 ? (
-            timeSlots.map((slot) => (
-              <button
-                key={slot}
-                onClick={() => {
-                  if (selectedDate) {
-                    setSelectedTime(slot);
-                    setShowForm(true);
-                  }
-                }}
-                className={`py-2 w-full text-sm rounded-md border border-gray-700 transition-all flex justify-center items-center gap-2
-                  ${
-                    selectedDate
-                      ? selectedTime === slot
-                        ? "bg-blue-600 text-white"
-                        : "bg-black text-white hover:bg-blue-700"
-                      : "opacity-50 cursor-not-allowed"
-                  }`}
-              >
-                <span className="w-2 h-2 bg-green-400 rounded-full inline-block"></span>
-                {slot}
-              </button>
-            ))
-          ) : (
-            <div className="border border-red-600 text-red-500 px-4 py-6 rounded text-center text-sm">
-              <p>
-                No slots available on{" "}
-                {selectedDate?.toLocaleDateString("en-GB")}
-              </p>
-            </div>
-          )}
+        {timeSlots.length > 0 ? (
+  timeSlots.map((slot) => (
+    <button
+      key={slot}
+      onClick={() => {
+        if (selectedDate) {
+          setSelectedTime(slot);
+          setShowForm(true);
+        }
+      }}
+      className={`py-2 w-full text-sm rounded-md border border-gray-700 transition-all flex justify-center items-center gap-2
+        ${
+          selectedDate
+            ? selectedTime === slot
+              ? "bg-blue-600 text-white"
+              : "bg-black text-white hover:bg-blue-700"
+            : "opacity-50 cursor-not-allowed"
+        }`}
+    >
+      <span className="w-2 h-2 bg-green-400 rounded-full inline-block"></span>
+      {slot}
+    </button>
+  ))
+) : (
+  <div className="border border-red-600 text-red-500 px-4 py-6 rounded text-center text-sm">
+    <p>No slots available on any upcoming day.</p>
+  </div>
+)}
+
         </div>
       </div>
     </div>

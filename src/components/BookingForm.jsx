@@ -49,10 +49,7 @@ const BookingForm = () => {
     const newHours = date.getHours();
     const formattedHours = newHours % 12 || 12;
     const newModifier = newHours >= 12 ? "PM" : "AM";
-    return `${formattedHours}:${String(date.getMinutes()).padStart(
-      2,
-      "0"
-    )} ${newModifier}`;
+    return `${formattedHours}:${String(date.getMinutes()).padStart(2, "0")} ${newModifier}`;
   };
 
   const handleSubmit = async (e) => {
@@ -62,15 +59,12 @@ const BookingForm = () => {
 
     const phoneValid = /^[0-9]{10}$/.test(form.phone);
     const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
-    if (!phoneValid)
-      return toast.error("📱 Enter a valid 10-digit mobile number");
+    if (!phoneValid) return toast.error("📱 Enter a valid 10-digit mobile number");
     if (!emailValid) return toast.error("📧 Enter a valid email address");
 
     const dateStr = format(selectedDate, "yyyy-MM-dd");
     const slotList = dateSlotMap[dateStr] || [];
     const selectedSlotObj = slotList.find((s) => s.time === selectedTime);
-    console.log(slotList);
-
     if (!selectedSlotObj) return toast.error("❌ Selected time is invalid");
 
     try {
@@ -119,12 +113,39 @@ const BookingForm = () => {
       try {
         const data = await getSlotConfig();
         const map = {};
-        data.forEach(({ date, slots }) => (map[date] = slots));
+        data.forEach(({ date, slots }) => {
+          map[date] = slots;
+        });
         setDateSlotMap(map);
+
+        const now = new Date();
+        now.setSeconds(0, 0);
+
+        const sortedDates = Object.keys(map).sort();
+        for (let dateStr of sortedDates) {
+          const slots = map[dateStr];
+          for (let slot of slots) {
+            const [time, meridian] = slot.time.split(" ");
+            let [hours, minutes] = time.split(":").map(Number);
+            if (meridian === "PM" && hours !== 12) hours += 12;
+            if (meridian === "AM" && hours === 12) hours = 0;
+
+            const slotDate = new Date(`${dateStr}T${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00`);
+
+            if (slotDate > now) {
+              setSelectedDate(new Date(dateStr));
+              setSelectedTime("");
+              return;
+            }
+          }
+        }
+        setSelectedDate(null);
+        setSelectedTime("");
       } catch (err) {
         console.error("❌ Failed to fetch slots:", err);
       }
     };
+
     fetchSlotConfig();
   }, []);
 
@@ -133,22 +154,15 @@ const BookingForm = () => {
     const first = new Date(year, month, 1);
     const last = new Date(year, month + 1, 0);
     for (let i = 0; i < first.getDay(); i++) days.push(null);
-    for (let d = 1; d <= last.getDate(); d++)
-      days.push(new Date(year, month, d));
+    for (let d = 1; d <= last.getDate(); d++) days.push(new Date(year, month, d));
     return days;
   };
 
-  const selectedDateStr = selectedDate
-    ? format(selectedDate, "yyyy-MM-dd")
-    : null;
-
-  const timeSlots =
-    selectedDateStr && dateSlotMap[selectedDateStr]
-      ? [...new Set(dateSlotMap[selectedDateStr].map((s) => s.time))]
-      : [];
+  const selectedDateStr = selectedDate ? format(selectedDate, "yyyy-MM-dd") : null;
+  const timeSlots = selectedDateStr && dateSlotMap[selectedDateStr] ? [...new Set(dateSlotMap[selectedDateStr].map((s) => s.time))] : [];
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-black text-black px-4">
+    <div className="flex items-center justify-center min-h-screen bg-black text-black px-6 md:px-12 lg:px-20 py-10">
       <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       <div className="w-full max-w-6xl">
         {!showForm ? (
@@ -171,8 +185,6 @@ const BookingForm = () => {
           />
         ) : (
           <div className="min-h-screen bg-black text-white px-4 py-8 md:px-10 flex items-center justify-center">
-            {/* DateTimeSelector */}
-
             <RegistrationForm
               form={form}
               setForm={setForm}
@@ -186,7 +198,6 @@ const BookingForm = () => {
           </div>
         )}
       </div>
-
       {showSuccess && <SuccessModal clientEmail={form.email} />}
     </div>
   );
