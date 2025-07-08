@@ -81,11 +81,12 @@ const BookingForm = () => {
         toast.success("✅ Booking confirmed!");
         resetForm();
       } else {
-        toast.error("❌ Booking failed, try again.");
+         
+        toast.error(response);
       }
     } catch (err) {
       console.error("Booking error:", err);
-      toast.error("Something went wrong. Try again.");
+      toast.error(err);
     }
   };
 

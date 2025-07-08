@@ -25,7 +25,7 @@ export const bookAppointment = async (data) => {
     return response.data;
   } catch (error) {
     console.log(error);
-    throw error.response?.data || error.message;
+    return error.response.data.message;
   }
 };
 
