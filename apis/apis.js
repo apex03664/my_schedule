@@ -1,7 +1,7 @@
 import axios from "axios";
 
 //  const BASE_URL = "https://s6q2uf08u2.execute-api.eu-north-1.amazonaws.com/api";
-const BASE_URL = "http://apiem.esromagica.in/api";
+const BASE_URL = "https://apiem.esromagica.in/api";
 
 // Get all bookings
 export const getAllBookings = async () => {
