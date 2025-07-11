@@ -189,7 +189,7 @@ const RegistrationForm = ({
           <select
             name="batchNo"
             required
-            value={form.batchNo || ""}
+            value={form.batchNo }
             onChange={(e) => setForm({ ...form, batchNo: e.target.value })}
             className="w-full px-4 py-2 border border-gray-700 rounded bg-black text-white focus:outline-none"
           >
@@ -234,7 +234,7 @@ const RegistrationForm = ({
             GRADE of Student <span className="text-red-500">*</span>
           </label>
           <div className="space-y-1">
-            {["GRADE 3-4", "GRADE 5-7", "GRADE 8-10", "GRADE 11-12"].map(
+            {["5th", "6th", "7th", "8th" , "9th"].map(
               (g) => (
                 <label key={g} className="flex items-center gap-2">
                   <input

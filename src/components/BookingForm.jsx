@@ -71,6 +71,7 @@ const BookingForm = () => {
       const response = await bookAppointment({
         ...form,
         date: dateStr,
+        program:"ISRO MISSIONS WORKSHOP 5TH TO 9TH",
         time: selectedTime,
         counselorEmail: selectedSlotObj.counselorEmail,
         counselorId: selectedSlotObj.counselorId,
