@@ -130,7 +130,7 @@ const DateTimeSelector = ({
                     isSelected
                       ? "bg-white text-black font-bold"
                       : isClickable
-                      ? "bg-blue-700 text-white hover:bg-white hover:text-black border border-green-500"
+                      ? "bg-white-700 text-white hover:bg-white hover:text-black border border-green-500"
                       : "bg-gray-900 text-gray-600 cursor-not-allowed opacity-50"
                   }`}
               >
