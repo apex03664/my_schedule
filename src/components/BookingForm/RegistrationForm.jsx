@@ -196,9 +196,9 @@ const RegistrationForm = ({
             <option value="" disabled>
               Select Batch No
             </option>
-            <option value="93">Batch 94</option>
-            <option value="92">Batch 93</option>
-            <option value="91">Batch 92</option>
+            <option value="95">Batch 95</option>
+            <option value="94">Batch 94</option>
+            <option value="93">Batch 93</option>
           </select>
         </div>
 
