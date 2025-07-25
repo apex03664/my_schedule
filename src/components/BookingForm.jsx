@@ -26,6 +26,7 @@ const BookingForm = () => {
     location: "",
     grade: "",
     countryCode: "+91",
+    batchNo:"96",
     parentConfirmed: false,
   });
 
