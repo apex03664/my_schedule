@@ -193,12 +193,11 @@ const RegistrationForm = ({
             onChange={(e) => setForm({ ...form, batchNo: e.target.value })}
             className="w-full px-4 py-2 border border-gray-700 rounded bg-black text-white focus:outline-none"
           >
-            <option value="Batch 95" disabled>
+            <option value="Batch 98" disabled>
               Select Batch No
             </option>
-            <option value="95">Batch 95</option>
-            <option value="94">Batch 94</option>
-            <option value="93">Batch 93</option>
+            <option value="98">Batch 98</option>
+            <option value="97">Batch 97</option>
           </select>
         </div>
 
