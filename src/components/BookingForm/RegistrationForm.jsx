@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import rocket from "./rocket.json"
 import { useEffect } from "react";
 import axios from "axios";
-
+import PhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/style.css'
 import Lottie from "lottie-react";
+
 const RegistrationForm = ({
   form,
   setForm,
@@ -152,35 +154,60 @@ const RegistrationForm = ({
         </div>
 
         {/* Mobile */}
+        {/* Mobile */}
         <div>
           <label className="block font-semibold mb-1">
             Mobile number <span className="text-red-500">*</span>
           </label>
-          <div className="flex gap-2">
-            <select
-              required
-              className="w-1/3 px-3 py-2 border border-gray-700 bg-black text-white rounded"
-              value={form.countryCode || "+91"}
-              onChange={(e) =>
-                setForm({ ...form, countryCode: e.target.value })
-              }
-            >
-              <option value="+91">+91</option>
-              <option value="+1">+1</option>
-              <option value="+44">+44</option>
-              <option value="+971">+971</option>
-            </select>
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Phone Number"
-              value={form.phone}
-              onChange={handleChange}
-              required
-              className="w-2/3 px-4 py-2 border border-gray-700 rounded bg-black text-white focus:outline-none"
-            />
-          </div>
+          <PhoneInput
+            country={'in'}
+            value={form.phone}
+            onChange={(value, countryData) => {
+              setForm({
+                ...form,
+                phone: value,
+                countryCode: `+${countryData.dialCode}`
+              });
+            }}
+            inputProps={{
+              name: 'phone',
+              required: true,
+              className: 'form-control'
+            }}
+            containerStyle={{
+              width: '100%'
+            }}
+            inputStyle={{
+              width: '100%',
+              height: '42px',
+              backgroundColor: '#000000',
+              border: '1px solid #374151',
+              borderRadius: '0.375rem',
+              color: '#ffffff',
+              fontSize: '14px'
+            }}
+            buttonStyle={{
+              backgroundColor: '#000000',
+              border: '1px solid #374151',
+              borderRadius: '0.375rem 0 0 0.375rem'
+            }}
+            dropdownStyle={{
+              backgroundColor: '#000000',
+              border: '1px solid #374151',
+              color: '#ffffff',
+              maxHeight: '200px',
+              overflowY: 'auto'
+            }}
+            searchStyle={{
+              backgroundColor: '#000000',
+              color: '#ffffff'
+            }}
+            enableSearch={true}
+            disableSearchIcon={true}
+            placeholder="Enter phone number"
+          />
         </div>
+
         {/* Batch No */}
         <div>
           <label className="block font-semibold mb-1">
@@ -189,7 +216,7 @@ const RegistrationForm = ({
           <select
             name="batchNo"
             required
-            value={form.batchNo }
+            value={form.batchNo}
             onChange={(e) => setForm({ ...form, batchNo: e.target.value })}
             className="w-full px-4 py-2 border border-gray-700 rounded bg-black text-white focus:outline-none"
           >
@@ -221,7 +248,7 @@ const RegistrationForm = ({
               onClick={detectLocation}
               className="whitespace-nowrap px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white hover:bg-gray-700"
             >
-             Detect
+              Detect
             </button>
           </div>
         </div>
@@ -233,7 +260,7 @@ const RegistrationForm = ({
             GRADE of Student <span className="text-red-500">*</span>
           </label>
           <div className="space-y-1">
-            {["5th", "6th", "7th", "8th" , "9th"].map(
+            {["5th", "6th", "7th", "8th", "9th"].map(
               (g) => (
                 <label key={g} className="flex items-center gap-2">
                   <input
@@ -287,12 +314,14 @@ const RegistrationForm = ({
             type="submit"
             disabled={
               !form.name ||
+              !form.phone ||
               !form.location ||
               !form.grade ||
               !form.parentConfirmed ||
               isSubmitting
             }
             className={`px-6 py-2 rounded font-semibold ${!form.name ||
+              !form.phone ||
               !form.location ||
               !form.grade ||
               !form.parentConfirmed ||
@@ -300,6 +329,7 @@ const RegistrationForm = ({
               ? "bg-gray-600 text-gray-400 cursor-not-allowed"
               : "bg-blue-600 hover:bg-blue-700 text-white"
               }`}
+
           >
             ✅ Confirm Booking
           </button>
