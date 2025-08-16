@@ -192,7 +192,7 @@ const batchOptions = [currentBatch, previousBatch];
       const response = await bookAppointment({
         ...form,
         date: dateStr,
-        program: `ISRO MISSIONS WORKSHOP BATCH ${batchInfo.batch} (${batchInfo.startDate} - ${batchInfo.endDate})`,
+        program: `ISRO MISSIONS WORKSHOP 5TH TO 9TH`,
         time: selectedTime,
         counselorEmail: selectedSlotObj.counselorEmail,
         counselorId: selectedSlotObj.counselorId,
