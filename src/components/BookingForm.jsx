@@ -75,7 +75,7 @@ const batchOptions = [currentBatch, previousBatch];
     location: "",
     grade: "",
     countryCode: "+91",
-    batchNo: currentBatch.toString(),
+    batchNo: "100",
     parentConfirmed: false,
   });
 

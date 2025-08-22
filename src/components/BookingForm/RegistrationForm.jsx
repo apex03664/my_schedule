@@ -210,7 +210,7 @@ const RegistrationForm = ({
         </div>
 
         {/* Batch No */}
-        <div>
+        {/* <div>
           <label className="block font-semibold mb-1">
             Batch No <span className="text-red-500">*</span>
           </label>
@@ -224,7 +224,7 @@ const RegistrationForm = ({
             ))}
           </select>
 
-        </div>
+        </div> */}
 
         {/* Location */}
         <div>
