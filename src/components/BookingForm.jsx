@@ -6,52 +6,26 @@ import SuccessModal from "./BookingForm/SuccessModel";
 import RegistrationForm from "./BookingForm/RegistrationForm";
 import DateTimeSelector from "./BookingForm/DateTimeSelector";
 import { format } from "date-fns";
+import useBatch from "./useBatch";
 
 const BookingForm = () => {
   const today = new Date();
 
-  // Helper to get Friday of the current week for batch 99 base
-  const getFridayOfCurrentWeek = (date) => {
-    const day = date.getDay(); // 0 Sun, 1 Mon, ..., 5 Fri
-    // Days to subtract to get Friday: if today is Fri (5), subtract 0; else subtract days accordingly
-    const daysToFriday = day >= 5 ? day - 5 : day + 2;
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate() - daysToFriday);
-  };
+  // Use batch from API
+  const { currentBatch, loading: batchLoading, error: batchError } = useBatch();
 
-  // Calculate batch number starting at 99 for current week Friday
-  const getBatchForDate = (date) => {
-    const batch99Friday = getFridayOfCurrentWeek(today);
-    const diffTime = date.getTime() - batch99Friday.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const weeksPassed = Math.floor(diffDays / 7);
-    return 99 + (weeksPassed >= 0 ? weeksPassed : 0);
-  };
+  // Compute batch options: current + 2 previous batches if available
+  const batchOptions = [];
+  if (currentBatch !== null) {
+    batchOptions.push(currentBatch);
+    if (currentBatch > 99) batchOptions.push(currentBatch - 1);
+    if (currentBatch > 100) batchOptions.push(currentBatch - 2);
+  } else {
+    // Show fallback batch if API not loaded
+    batchOptions.push("Can't fetch ! Kindly book and inform us" );
+   
+  }
 
-  const getBatchDateRange = (date) => {
-    const batch = getBatchForDate(date);
-    const dayOfWeek = date.getDay();
-    let startFriday;
-    if (dayOfWeek === 5) {
-      startFriday = new Date(date);
-    } else {
-      const daysSinceFriday =
-        dayOfWeek === 6 ? 1 :
-        dayOfWeek === 0 ? 2 :
-        dayOfWeek === 1 ? 3 :
-        dayOfWeek === 2 ? 4 :
-        dayOfWeek === 3 ? 5 : 6;
-      startFriday = new Date(date.getTime() - (daysSinceFriday * 24 * 60 * 60 * 1000));
-    }
-    const endThursday = new Date(startFriday.getTime() + 6 * 24 * 60 * 60 * 1000);
-
-    return {
-      batch,
-      startDate: format(startFriday, "do MMM"),
-      endDate: format(endThursday, "do MMM yyyy"),
-    };
-  };
-
-  // State
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -62,12 +36,7 @@ const BookingForm = () => {
   const [timezone, setTimezone] = useState("Asia/Kolkata");
   const [currentMonthDays, setCurrentMonthDays] = useState([]);
 
-  // Batch options: current batch and previous batch
- const currentBatch = getBatchForDate(today);
-const previousBatch = currentBatch > 99 ? currentBatch - 1 : 98;
-const batchOptions = [currentBatch, previousBatch];
-
- 
+  // Form state, initialize batchNo using currentBatch when available
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -75,22 +44,18 @@ const batchOptions = [currentBatch, previousBatch];
     location: "",
     grade: "",
     countryCode: "+91",
-    batchNo: "100",
+    batchNo: currentBatch !== null ? currentBatch.toString() : "100",
     parentConfirmed: false,
   });
 
-  // Update batch number when selected date changes
+  // Update batchNo on currentBatch change or selectedDate change
   useEffect(() => {
-    if (selectedDate) {
-      const batchForSelectedDate = getBatchForDate(selectedDate);
-      setForm((prev) => ({
-        ...prev,
-        batchNo: batchForSelectedDate.toString(),
-      }));
+    if (currentBatch !== null) {
+      setForm((prev) => ({ ...prev, batchNo: currentBatch.toString() }));
     }
-  }, [selectedDate]);
+  }, [currentBatch]);
 
-  // Generate days for current month (for calendar)
+  // Generate calendar days for current month
   useEffect(() => {
     const generateMonthDays = (year, month) => {
       const days = [];
@@ -101,9 +66,9 @@ const batchOptions = [currentBatch, previousBatch];
       return days;
     };
     setCurrentMonthDays(generateMonthDays(currentYear, currentMonth));
-  }, [currentMonth, currentYear]);
+  }, [currentYear, currentMonth]);
 
-  // Fetch slots and auto-select the first upcoming slot & set batch accordingly
+  // Fetch slots
   useEffect(() => {
     const fetchSlotConfig = async () => {
       try {
@@ -126,17 +91,12 @@ const batchOptions = [currentBatch, previousBatch];
             if (meridian === "PM" && hours !== 12) hours += 12;
             if (meridian === "AM" && hours === 12) hours = 0;
 
-            const slotDate = new Date(`${dateStr}T${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00`);
+            const slotDate = new Date(`${dateStr}T${hours.toString().padStart(2,"0")}:${minutes.toString().padStart(2,"0")}:00`);
 
             if (slotDate > now) {
               const selectedDateObj = new Date(dateStr);
               setSelectedDate(selectedDateObj);
               setSelectedTime("");
-              const batchForAutoSelected = getBatchForDate(selectedDateObj);
-              setForm((prev) => ({
-                ...prev,
-                batchNo: batchForAutoSelected.toString(),
-              }));
               return;
             }
           }
@@ -147,7 +107,6 @@ const batchOptions = [currentBatch, previousBatch];
         console.error("❌ Failed to fetch slots:", err);
       }
     };
-
     fetchSlotConfig();
   }, []);
 
@@ -186,8 +145,6 @@ const batchOptions = [currentBatch, previousBatch];
     const selectedSlotObj = slotList.find((s) => s.time === selectedTime);
     if (!selectedSlotObj) return toast.error("❌ Selected time is invalid");
 
-    const batchInfo = getBatchDateRange(selectedDate);
-
     try {
       const response = await bookAppointment({
         ...form,
@@ -200,7 +157,7 @@ const batchOptions = [currentBatch, previousBatch];
 
       if (response.success || response.booking?._id) {
         setShowSuccess(true);
-        toast.success(`✅ Booking confirmed for Batch ${batchInfo.batch}!`);
+        toast.success(`✅ Booking confirmed!`);
         resetForm();
       } else {
         toast.error(response);
@@ -219,7 +176,7 @@ const batchOptions = [currentBatch, previousBatch];
       location: "",
       grade: "",
       countryCode: "+91",
-      batchNo: currentBatch.toString(),
+      batchNo: currentBatch !== null ? currentBatch.toString() : "100",
       parentConfirmed: false,
     });
     setSelectedDate(null);
@@ -232,8 +189,6 @@ const batchOptions = [currentBatch, previousBatch];
     selectedDateStr && dateSlotMap[selectedDateStr]
       ? [...new Set(dateSlotMap[selectedDateStr].map((s) => s.time))]
       : [];
-
-  const currentBatchInfo = getBatchDateRange(today);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-black text-black px-6 md:px-12 lg:px-20 py-10">
@@ -256,7 +211,6 @@ const batchOptions = [currentBatch, previousBatch];
             timeSlots={timeSlots}
             setShowForm={setShowForm}
             dateSlotMap={dateSlotMap}
-            currentBatchInfo={currentBatchInfo}
           />
         ) : (
           <div className="min-h-screen bg-black text-white px-4 py-8 md:px-10 flex items-center justify-center">
@@ -269,8 +223,7 @@ const batchOptions = [currentBatch, previousBatch];
               setShowForm={setShowForm}
               handleSubmit={handleSubmit}
               handleChange={handleChange}
-              batchOptions={batchOptions} // pass both current and previous batches
-              batchInfo={currentBatchInfo}
+              batchOptions={batchOptions}
             />
           </div>
         )}
