@@ -181,7 +181,7 @@ const DateTimeSelector = ({
   ))
 ) : (
   <div className="border border-red-600 text-red-500 px-4 py-6 rounded text-center text-sm">
-    <p>No slots available on any upcoming day.</p>
+    <p>No slots available selected</p>
   </div>
 )}
 

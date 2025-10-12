@@ -22,8 +22,8 @@ const BookingForm = () => {
     if (currentBatch > 100) batchOptions.push(currentBatch - 2);
   } else {
     // Show fallback batch if API not loaded
-    batchOptions.push("Can't fetch ! Kindly book and inform us" );
-   
+    batchOptions.push("Can't fetch ! Kindly book and inform us");
+
   }
 
   const [selectedDate, setSelectedDate] = useState(null);
@@ -69,76 +69,76 @@ const BookingForm = () => {
   }, [currentYear, currentMonth]);
 
   // Fetch slots - Exclude 10:00-11:00 PM slot
-useEffect(() => {
-  const fetchSlotConfig = async () => {
-    try {
-      const data = await getSlotConfig();
-      const map = {};
-      
-      // Define excluded time slots
-      const excludedTimeSlots = [
-        "10:00-11:00 PM",
-        "10-11 PM",           // Alternative format
-        "10:00 PM-11:00 PM"   // Another possible format
-      ];
-      
-      data.forEach(({ date, slots }) => {
-        // Filter out the excluded time slots
-        const filteredSlots = slots.filter(slot => {
-          const normalizedTime = slot.time.replace(/\s+/g, ' ').trim();
-          return !excludedTimeSlots.includes(normalizedTime);
+  useEffect(() => {
+    const fetchSlotConfig = async () => {
+      try {
+        const data = await getSlotConfig();
+        const map = {};
+
+        // Define excluded time slots
+        const excludedTimeSlots = [
+          "10:00-11:00 PM",
+          "10-11 PM",           // Alternative format
+          "10:00 PM-11:00 PM"   // Another possible format
+        ];
+
+        data.forEach(({ date, slots }) => {
+          // Filter out the excluded time slots
+          const filteredSlots = slots.filter(slot => {
+            const normalizedTime = slot.time.replace(/\s+/g, ' ').trim();
+            return !excludedTimeSlots.includes(normalizedTime);
+          });
+
+          // Only add to map if there are remaining slots after filtering
+          if (filteredSlots.length > 0) {
+            map[date] = filteredSlots;
+            console.log(`📅 ${date}: Showing ${filteredSlots.length} slots (excluded 10-11 PM):`,
+              filteredSlots.map(s => s.time));
+          } else {
+            console.log(`📅 ${date}: No slots available after filtering`);
+          }
         });
-        
-        // Only add to map if there are remaining slots after filtering
-        if (filteredSlots.length > 0) {
-          map[date] = filteredSlots;
-          console.log(`📅 ${date}: Showing ${filteredSlots.length} slots (excluded 10-11 PM):`, 
-            filteredSlots.map(s => s.time));
-        } else {
-          console.log(`📅 ${date}: No slots available after filtering`);
-        }
-      });
-      
-      console.log(`🎯 Calendar shows ${Object.keys(map).length} dates with available slots`);
-      setDateSlotMap(map);
 
-      const now = new Date();
-      now.setSeconds(0, 0);
+        console.log(`🎯 Calendar shows ${Object.keys(map).length} dates with available slots`);
+        setDateSlotMap(map);
 
-      const sortedDates = Object.keys(map).sort();
-      for (let dateStr of sortedDates) {
-        const slots = map[dateStr];
-        for (let slot of slots) {
-          try {
-            const [time, meridian] = slot.time.split(" ");
-            let [hours, minutes] = time.split(":").map(Number);
-            if (meridian === "PM" && hours !== 12) hours += 12;
-            if (meridian === "AM" && hours === 12) hours = 0;
+        const now = new Date();
+        now.setSeconds(0, 0);
 
-            const slotDate = new Date(`${dateStr}T${hours.toString().padStart(2,"0")}:${minutes.toString().padStart(2,"0")}:00`);
+        const sortedDates = Object.keys(map).sort();
+        for (let dateStr of sortedDates) {
+          const slots = map[dateStr];
+          for (let slot of slots) {
+            try {
+              const [time, meridian] = slot.time.split(" ");
+              let [hours, minutes] = time.split(":").map(Number);
+              if (meridian === "PM" && hours !== 12) hours += 12;
+              if (meridian === "AM" && hours === 12) hours = 0;
 
-            if (slotDate > now) {
-              const selectedDateObj = new Date(dateStr);
-              setSelectedDate(selectedDateObj);
-              setSelectedTime("");
-              console.log(`✅ Auto-selected first available slot: ${dateStr} at ${slot.time}`);
-              return;
+              const slotDate = new Date(`${dateStr}T${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00`);
+
+              if (slotDate > now) {
+                const selectedDateObj = new Date(dateStr);
+                setSelectedDate(selectedDateObj);
+                setSelectedTime("");
+                console.log(`✅ Auto-selected first available slot: ${dateStr} at ${slot.time}`);
+                return;
+              }
+            } catch (error) {
+              console.warn('Error processing slot:', slot, error);
+              continue;
             }
-          } catch (error) {
-            console.warn('Error processing slot:', slot, error);
-            continue;
           }
         }
+        setSelectedDate(null);
+        setSelectedTime("");
+        console.log(`ℹ️ No future slots available after excluding 10-11 PM`);
+      } catch (err) {
+        console.error("❌ Failed to fetch slots:", err);
       }
-      setSelectedDate(null);
-      setSelectedTime("");
-      console.log(`ℹ️ No future slots available after excluding 10-11 PM`);
-    } catch (err) {
-      console.error("❌ Failed to fetch slots:", err);
-    }
-  };
-  fetchSlotConfig();
-}, []);
+    };
+    fetchSlotConfig();
+  }, []);
 
 
   const handleChange = (e) => {
