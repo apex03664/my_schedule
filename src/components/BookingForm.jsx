@@ -1,29 +1,71 @@
 import { useState, useEffect } from "react";
-import { bookAppointment, getSlotConfig } from "./../../apis/apis";
+import { bookAppointment, getAvailableSlots, getSlotConfig } from "./../../apis/apis";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import dayjs from 'dayjs'; // ✅ Add dayjs
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import SuccessModal from "./BookingForm/SuccessModel";
 import RegistrationForm from "./BookingForm/RegistrationForm";
 import DateTimeSelector from "./BookingForm/DateTimeSelector";
 import { format } from "date-fns";
 import useBatch from "./useBatch";
 
+// ✅ Initialize dayjs plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+// ✅ Helper: Get user's timezone automatically
+const getUserTimezone = () => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch (error) {
+    console.warn('Failed to detect timezone, defaulting to Asia/Kolkata');
+    return 'Asia/Kolkata';
+  }
+};
+
+// ✅ Helper: Convert IST slot to user's timezone
+const convertISTToUserTimezone = (istDateStr, istTimeSlot, userTimezone) => {
+  try {
+    const [startTime, endTime] = istTimeSlot.split('-').map(t => t.trim());
+
+    // Parse IST datetime
+    const istStartStr = `${istDateStr} ${startTime}`;
+    const istStart = dayjs.tz(istStartStr, 'YYYY-MM-DD h:mm A', 'Asia/Kolkata');
+
+    if (!istStart.isValid()) {
+      console.warn('Invalid IST time:', istStartStr);
+      return istTimeSlot; // Fallback
+    }
+
+    // Convert to user's timezone
+    const userStart = istStart.tz(userTimezone);
+    const userEnd = userStart.add(1, 'hour'); // Assuming 1-hour slots
+
+    return {
+      displayTime: `${userStart.format('h:mm A')}-${userEnd.format('h:mm A')}`,
+      originalIST: istTimeSlot,
+      date: userStart.format('YYYY-MM-DD'),
+      dateObj: userStart.toDate()
+    };
+  } catch (error) {
+    console.error('Conversion error:', error);
+    return istTimeSlot;
+  }
+};
+
 const BookingForm = () => {
   const today = new Date();
-
-  // Use batch from API
   const { currentBatch, loading: batchLoading, error: batchError } = useBatch();
 
-  // Compute batch options: current + 2 previous batches if available
   const batchOptions = [];
   if (currentBatch !== null) {
     batchOptions.push(currentBatch);
     if (currentBatch > 99) batchOptions.push(currentBatch - 1);
     if (currentBatch > 100) batchOptions.push(currentBatch - 2);
   } else {
-    // Show fallback batch if API not loaded
     batchOptions.push("Can't fetch ! Kindly book and inform us");
-
   }
 
   const [selectedDate, setSelectedDate] = useState(null);
@@ -33,10 +75,11 @@ const BookingForm = () => {
   const [dateSlotMap, setDateSlotMap] = useState({});
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
-  const [timezone, setTimezone] = useState("Asia/Kolkata");
+
+  // ✅ Auto-detect user's timezone
+  const [userTimezone, setUserTimezone] = useState(getUserTimezone());
   const [currentMonthDays, setCurrentMonthDays] = useState([]);
 
-  // Form state, initialize batchNo using currentBatch when available
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -48,14 +91,12 @@ const BookingForm = () => {
     parentConfirmed: false,
   });
 
-  // Update batchNo on currentBatch change or selectedDate change
   useEffect(() => {
     if (currentBatch !== null) {
       setForm((prev) => ({ ...prev, batchNo: currentBatch.toString() }));
     }
   }, [currentBatch]);
 
-  // Generate calendar days for current month
   useEffect(() => {
     const generateMonthDays = (year, month) => {
       const days = [];
@@ -68,77 +109,136 @@ const BookingForm = () => {
     setCurrentMonthDays(generateMonthDays(currentYear, currentMonth));
   }, [currentYear, currentMonth]);
 
-  // Fetch slots - Exclude 10:00-11:00 PM slot
+  // ✅ FIXED: Fetch UTC slots and convert to user's timezone
   useEffect(() => {
     const fetchSlotConfig = async () => {
       try {
-        const data = await getSlotConfig();
+        // ✅ Use public API that returns UTC data
+        const data = await getAvailableSlots(); // Changed from getSlotConfig
         const map = {};
 
-        // Define excluded time slots
-        const excludedTimeSlots = [
-          "10:00-11:00 PM",
-          "10-11 PM",           // Alternative format
-          "10:00 PM-11:00 PM"   // Another possible format
-        ];
+        console.log(`🌍 User timezone: ${userTimezone}`);
+        console.log(`📥 Received ${data.length} dates from backend (UTC format)`);
+        console.log('Sample data:', data[0]);
 
-        data.forEach(({ date, slots }) => {
-          // Filter out the excluded time slots
-          const filteredSlots = slots.filter(slot => {
-            const normalizedTime = slot.time.replace(/\s+/g, ' ').trim();
-            return !excludedTimeSlots.includes(normalizedTime);
+        data.forEach(({ date, dateUTC, slots }) => {
+          if (!slots || slots.length === 0) return;
+
+          // ✅ Convert UTC slots to user's timezone
+          const convertedSlots = slots.map(slot => {
+            // Convert UTC to user's local timezone
+            const converted = convertUTCToUserTimezone(dateUTC, slot.timeUTC, userTimezone);
+
+            console.log(`🔄 Converting: UTC ${slot.timeUTC} → ${userTimezone} ${converted.displayTime}`);
+
+            return {
+              ...slot,
+              timeUTC: slot.timeUTC, // Keep original UTC
+              displayTime: converted.displayTime, // User's local time
+              userDate: converted.date, // User's local date
+              userDateObj: converted.dateObj
+            };
           });
 
-          // Only add to map if there are remaining slots after filtering
-          if (filteredSlots.length > 0) {
-            map[date] = filteredSlots;
-            console.log(`📅 ${date}: Showing ${filteredSlots.length} slots (excluded 10-11 PM):`,
-              filteredSlots.map(s => s.time));
-          } else {
-            console.log(`📅 ${date}: No slots available after filtering`);
-          }
+          // ✅ Group by user's local date (slots might shift dates across timezones)
+          convertedSlots.forEach(slot => {
+            const userDateStr = slot.userDate;
+            if (!map[userDateStr]) {
+              map[userDateStr] = [];
+            }
+            map[userDateStr].push(slot);
+          });
+
+          console.log(`✅ Processed ${convertedSlots.length} slots for ${date}`);
         });
 
-        console.log(`🎯 Calendar shows ${Object.keys(map).length} dates with available slots`);
+        console.log(`🎯 Total available dates in ${userTimezone}: ${Object.keys(map).length}`);
         setDateSlotMap(map);
 
+        // ✅ Auto-select first available slot
         const now = new Date();
-        now.setSeconds(0, 0);
-
         const sortedDates = Object.keys(map).sort();
+
         for (let dateStr of sortedDates) {
           const slots = map[dateStr];
-          for (let slot of slots) {
-            try {
-              const [time, meridian] = slot.time.split(" ");
-              let [hours, minutes] = time.split(":").map(Number);
-              if (meridian === "PM" && hours !== 12) hours += 12;
-              if (meridian === "AM" && hours === 12) hours = 0;
-
-              const slotDate = new Date(`${dateStr}T${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00`);
-
-              if (slotDate > now) {
-                const selectedDateObj = new Date(dateStr);
-                setSelectedDate(selectedDateObj);
-                setSelectedTime("");
-                console.log(`✅ Auto-selected first available slot: ${dateStr} at ${slot.time}`);
-                return;
-              }
-            } catch (error) {
-              console.warn('Error processing slot:', slot, error);
-              continue;
+          if (slots && slots.length > 0) {
+            const firstSlot = slots[0];
+            if (firstSlot.userDateObj > now) {
+              setSelectedDate(new Date(dateStr));
+              setSelectedTime("");
+              console.log(`✅ Auto-selected: ${dateStr}`);
+              return;
             }
           }
         }
+
         setSelectedDate(null);
         setSelectedTime("");
-        console.log(`ℹ️ No future slots available after excluding 10-11 PM`);
+        console.log(`ℹ️ No future slots available`);
       } catch (err) {
         console.error("❌ Failed to fetch slots:", err);
+        toast.error("Failed to load available slots");
       }
     };
+
     fetchSlotConfig();
-  }, []);
+  }, [userTimezone]);
+
+  // ✅ FIXED: Convert UTC to user's timezone
+  const convertUTCToUserTimezone = (utcDateISO, utcTimeSlot, userTimezone) => {
+    try {
+      console.log('🔵 Converting UTC to user timezone:', {
+        utcDateISO,
+        utcTimeSlot,
+        userTimezone
+      });
+
+      // Split time range (e.g., "13:30-14:30")
+      const [startTime, endTime] = utcTimeSlot.split('-');
+
+      // Get UTC date in YYYY-MM-DD format
+      const utcDateStr = dayjs(utcDateISO).utc().format('YYYY-MM-DD');
+
+      // Parse UTC datetime
+      const utcStart = dayjs.utc(`${utcDateStr} ${startTime}`);
+
+      if (!utcStart.isValid()) {
+        console.error('❌ Invalid UTC time:', utcDateStr, startTime);
+        return {
+          displayTime: utcTimeSlot,
+          date: utcDateStr,
+          dateObj: new Date(utcDateStr)
+        };
+      }
+
+      console.log('🔵 Parsed UTC:', utcStart.format('YYYY-MM-DD HH:mm Z'));
+
+      // ✅ Convert to user's timezone
+      const userStart = utcStart.tz(userTimezone);
+      const userEnd = userStart.add(1, 'hour');
+
+      const result = {
+        displayTime: `${userStart.format('h:mm A')}-${userEnd.format('h:mm A')}`,
+        date: userStart.format('YYYY-MM-DD'),
+        dateObj: userStart.toDate()
+      };
+
+      console.log('✅ Converted to user timezone:', {
+        userTimezone,
+        userTime: result.displayTime,
+        userDate: result.date
+      });
+
+      return result;
+    } catch (error) {
+      console.error('❌ Conversion error:', error);
+      return {
+        displayTime: utcTimeSlot,
+        date: dayjs(utcDateISO).format('YYYY-MM-DD'),
+        dateObj: new Date(utcDateISO)
+      };
+    }
+  };
 
 
   const handleChange = (e) => {
@@ -166,29 +266,42 @@ const BookingForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedDate || !selectedTime) return toast.error("📅 Please select a date and time.");
+    if (!selectedDate || !selectedTime) {
+      return toast.error("📅 Please select a date and time.");
+    }
 
     const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
     if (!emailValid) return toast.error("📧 Enter a valid email address");
 
     const dateStr = format(selectedDate, "yyyy-MM-dd");
     const slotList = dateSlotMap[dateStr] || [];
-    const selectedSlotObj = slotList.find((s) => s.time === selectedTime);
-    if (!selectedSlotObj) return toast.error("❌ Selected time is invalid");
+    const selectedSlotObj = slotList.find((s) => s.displayTime === selectedTime);
+
+    if (!selectedSlotObj) {
+      return toast.error("❌ Selected time is invalid");
+    }
 
     try {
+      console.log('📤 Submitting booking:', {
+        userTime: selectedTime,
+        userTimezone,
+        istTime: selectedSlotObj.originalISTTime
+      });
+
+      // ✅ Send user's timezone and selected time to backend
       const response = await bookAppointment({
         ...form,
         date: dateStr,
         program: `ISRO MISSIONS WORKSHOP 5TH TO 9TH`,
-        time: selectedTime,
+        time: selectedTime, // User's local time
+        timezone: userTimezone, // ✅ Send user's timezone
         counselorEmail: selectedSlotObj.counselorEmail,
         counselorId: selectedSlotObj.counselorId,
       });
 
       if (response.success || response.booking?._id) {
         setShowSuccess(true);
-        toast.success(`✅ Booking confirmed!`);
+        toast.success(`✅ Booking confirmed for ${selectedTime} (${userTimezone})!`);
         resetForm();
       } else {
         toast.error(response);
@@ -216,19 +329,30 @@ const BookingForm = () => {
   };
 
   const selectedDateStr = selectedDate ? format(selectedDate, "yyyy-MM-dd") : null;
+
+  // ✅ Show converted time slots
   const timeSlots =
     selectedDateStr && dateSlotMap[selectedDateStr]
-      ? [...new Set(dateSlotMap[selectedDateStr].map((s) => s.time))]
+      ? [...new Set(dateSlotMap[selectedDateStr].map((s) => s.displayTime))]
       : [];
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-black text-black px-6 md:px-12 lg:px-20 py-10">
       <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       <div className="w-full max-w-6xl">
+        {/* ✅ Show timezone info */}
+        <div className="mb-4 p-3 bg-blue-900/30 border border-blue-500/30 rounded-lg text-white text-sm">
+          <div className="flex items-center gap-2">
+            <span>🌍</span>
+            <span>Your timezone: <strong>{userTimezone}</strong></span>
+            <span className="ml-auto text-xs text-gray-400">All times shown in your local time</span>
+          </div>
+        </div>
+
         {!showForm ? (
           <DateTimeSelector
-            timezone={timezone}
-            setTimezone={setTimezone}
+            timezone={userTimezone}
+            setTimezone={setUserTimezone}
             currentMonth={currentMonth}
             setCurrentMonth={setCurrentMonth}
             currentYear={currentYear}
@@ -250,6 +374,7 @@ const BookingForm = () => {
               setForm={setForm}
               selectedDate={selectedDate}
               selectedTime={selectedTime}
+              userTimezone={userTimezone}
               getOneHourLater={getOneHourLater}
               setShowForm={setShowForm}
               handleSubmit={handleSubmit}

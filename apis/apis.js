@@ -2,6 +2,7 @@ import axios from "axios";
 
 //  const BASE_URL = "https://s6q2uf08u2.execute-api.eu-north-1.amazonaws.com/api";
 const BASE_URL = "https://apiem.esromagica.in/api";
+// const BASE_URL = "http://localhost:5000/api";
 
 // Get all bookings
 export const getAllBookings = async () => {
@@ -29,11 +30,14 @@ export const bookAppointment = async (data) => {
   }
 };
 
+// ✅ PUBLIC API: Get UTC slots for international bookings
 export const getAvailableSlots = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/slots/available`);
+    const response = await axios.get(`${BASE_URL}/public/slots/available`);
+    console.log('📥 Received public slots (UTC):', response.data);
     return response.data;
   } catch (error) {
+    console.error('❌ Failed to fetch public slots:', error);
     throw error.response?.data || error.message;
   }
 };
