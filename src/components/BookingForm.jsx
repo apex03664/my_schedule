@@ -264,53 +264,57 @@ const BookingForm = () => {
     return `${formattedHours}:${String(date.getMinutes()).padStart(2, "0")} ${newModifier}`;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!selectedDate || !selectedTime) {
-      return toast.error("📅 Please select a date and time.");
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!selectedDate || !selectedTime) {
+    return toast.error("📅 Please select a date and time.");
+  }
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+  if (!emailValid) return toast.error("📧 Enter a valid email address");
+
+  const dateStr = format(selectedDate, "yyyy-MM-dd");
+  const slotList = dateSlotMap[dateStr] || [];
+  const selectedSlotObj = slotList.find((s) => s.displayTime === selectedTime);
+
+  if (!selectedSlotObj) {
+    return toast.error("❌ Selected time is invalid");
+  }
+
+  try {
+    console.log('📤 ISRO Workshop Booking:', {
+      userTime: selectedTime,
+      userTimezone,
+      timeSlotUTC: selectedSlotObj.timeUTC,
+      dateUTC: selectedSlotObj.userDateObj.toISOString()
+    });
+
+    // ✅ Send UTC data to backend
+    const response = await bookAppointment({
+      ...form,
+      date: dateStr,
+      program: `ISRO MISSIONS WORKSHOP 5TH TO 9TH`,
+      time: selectedTime, // User's local time (for display)
+      dateUTC: selectedSlotObj.userDateObj.toISOString(), // ✅ UTC date
+      timeSlotUTC: selectedSlotObj.timeUTC, // ✅ UTC time (e.g., "09:00-10:00")
+      timezone: userTimezone, // User's timezone (should be "Asia/Kolkata" for India)
+      counselorEmail: selectedSlotObj.counselorEmail,
+      counselorId: selectedSlotObj.counselorId,
+    });
+
+    if (response.success || response.booking?._id) {
+      setShowSuccess(true);
+      toast.success(`✅ Booking confirmed for ${selectedTime} (${userTimezone})!`);
+      resetForm();
+    } else {
+      toast.error(response);
     }
+  } catch (err) {
+    console.error("Booking error:", err);
+    toast.error(err.message || err);
+  }
+};
 
-    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
-    if (!emailValid) return toast.error("📧 Enter a valid email address");
-
-    const dateStr = format(selectedDate, "yyyy-MM-dd");
-    const slotList = dateSlotMap[dateStr] || [];
-    const selectedSlotObj = slotList.find((s) => s.displayTime === selectedTime);
-
-    if (!selectedSlotObj) {
-      return toast.error("❌ Selected time is invalid");
-    }
-
-    try {
-      console.log('📤 Submitting booking:', {
-        userTime: selectedTime,
-        userTimezone,
-        istTime: selectedSlotObj.originalISTTime
-      });
-
-      // ✅ Send user's timezone and selected time to backend
-      const response = await bookAppointment({
-        ...form,
-        date: dateStr,
-        program: `ISRO MISSIONS WORKSHOP 5TH TO 9TH`,
-        time: selectedTime, // User's local time
-        timezone: userTimezone, // ✅ Send user's timezone
-        counselorEmail: selectedSlotObj.counselorEmail,
-        counselorId: selectedSlotObj.counselorId,
-      });
-
-      if (response.success || response.booking?._id) {
-        setShowSuccess(true);
-        toast.success(`✅ Booking confirmed for ${selectedTime} (${userTimezone})!`);
-        resetForm();
-      } else {
-        toast.error(response);
-      }
-    } catch (err) {
-      console.error("Booking error:", err);
-      toast.error(err.message || err);
-    }
-  };
 
   const resetForm = () => {
     setForm({
