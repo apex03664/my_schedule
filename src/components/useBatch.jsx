@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Client, Databases } from "appwrite";
 
 const useBatch = () => {
   const [currentBatch, setCurrentBatch] = useState(null);
@@ -12,30 +11,19 @@ const useBatch = () => {
       setError(null);
 
       try {
-        const client = new Client()
-          .setEndpoint("https://fra.cloud.appwrite.io/v1") // Your Appwrite endpoint
-          .setProject("68ab181900053dec6d01"); // Your project ID
+        // Fetch from your n8n webhook
+        const response = await fetch("https://n8n.esromagica.com/webhook/c2b1f9b2-dfbd-410f-84ae-de5ed2f64f6d");
 
-        const databases = new Databases(client);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-        // Replace with your database ID and collection ID
-        const databaseId = "68ac18df000d67a0f27f";
-        const collectionId = "68ac18eb000b481b196f";
+        const data = await response.json();
 
-        // Query your collection for the current batch document
-        // Assuming you have a document that contains currentBatch field
-        // For example, fetching the document by ID or first document in collection
-
-        // Example: get a document by ID
-        const documentId = "68ac1d27000fc0cef7e4";
-
-        const response = await databases.getDocument(databaseId, collectionId, documentId);
-
-        // Assuming currentBatch field is stored as number in the document
-        setCurrentBatch(response.batchNo);
-
+        // Assuming n8n returns something like { batchNo: 108 }
+        setCurrentBatch((Number(data[0].Batch_No)) );
       } catch (err) {
-        setError(err.message || "Failed to fetch current batch from Appwrite");
+        setError(err.message || "Failed to fetch current batch from n8n");
       } finally {
         setLoading(false);
       }
