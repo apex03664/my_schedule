@@ -260,6 +260,21 @@ const RegistrationForm = ({
               </select>
             </div>
 
+            {/* School Name - Optional */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                School Name <span className="text-gray-500 text-xs">(Optional)</span>
+              </label>
+              <input
+                type="text"
+                name="schoolName"
+                placeholder="Enter your school name"
+                value={form.schoolName || ""}
+                onChange={(e) => setForm({ ...form, schoolName: e.target.value })}
+                className="w-full px-4 py-3 border border-[#1e2757] rounded-lg bg-[#0A0E27] text-white placeholder-gray-500 focus:outline-none focus:border-[#4F75FF] transition"
+              />
+            </div>
+
             {/* Batch No */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">

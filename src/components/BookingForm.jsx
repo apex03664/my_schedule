@@ -98,6 +98,7 @@ const [userTimezone, setUserTimezone] = useState(() => {
     phone: "",
     location: "",
     grade: "",
+    schoolName: "", // ✅ Optional school name field
     countryCode: "+971", // UAE
     batchNo: batchOptions[0]?.toString() || "99",
     parentConfirmed: false,
@@ -246,6 +247,7 @@ const [userTimezone, setUserTimezone] = useState(() => {
       phone: "",
       location: "",
       grade: "",
+      schoolName: "", // ✅ Reset school name
       countryCode: "+971",
       batchNo: batchOptions[0]?.toString() || "99",
       parentConfirmed: false,
