@@ -270,7 +270,7 @@ const RegistrationForm = ({
                 name="schoolName"
                 placeholder="Enter your school name"
                 value={form.schoolName || ""}
-                onChange={(e) => setForm({ ...form, schoolName: e.target.value })}
+                onChange={handleChange}
                 className="w-full px-4 py-3 border border-[#1e2757] rounded-lg bg-[#0A0E27] text-white placeholder-gray-500 focus:outline-none focus:border-[#4F75FF] transition"
               />
             </div>
