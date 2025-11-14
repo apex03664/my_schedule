@@ -73,11 +73,11 @@ const RegistrationForm = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0E27] py-4 px-4 sm:py-8 sm:px-6">
+    <div className="min-h-screen bg-[#1A0B2E] py-4 px-4 sm:py-8 sm:px-6">
       <div className="max-w-2xl mx-auto">
         <form
           onSubmit={onSubmit}
-          className="bg-[#131842] border border-[#1e2757] rounded-2xl p-6 space-y-6"
+          className="bg-[#2D1B4E] border border-[#4A2C6D] rounded-2xl p-6 space-y-6"
         >
           {isSubmitting && (
             <div className="fixed inset-0 bg-black/95 flex flex-col items-center justify-center z-[9999]">
@@ -98,9 +98,9 @@ const RegistrationForm = ({
           </div>
 
           {/* Selected DateTime */}
-          <div className="bg-[#0A0E27] rounded-xl p-4 border border-[#1e2757]">
+          <div className="bg-[#1A0B2E] rounded-xl p-4 border border-[#4A2C6D]">
             <div className="flex items-center gap-4">
-              <div className="bg-[#4F75FF] text-white font-bold px-4 py-3 rounded-lg text-center min-w-[60px]">
+              <div className="bg-[#9D4EDD] text-white font-bold px-4 py-3 rounded-lg text-center min-w-[60px]">
                 <div className="text-xs leading-none uppercase">
                   {selectedDate?.toLocaleString("en-US", { month: "short" })}
                 </div>
@@ -115,7 +115,7 @@ const RegistrationForm = ({
                     year: "numeric"
                   })}
                 </div>
-                <div className="text-sm text-[#4F75FF] font-medium mt-1">
+                <div className="text-sm text-[#9D4EDD] font-medium mt-1">
                   {selectedTime}
                 </div>
                 <div className="text-xs text-gray-500 mt-0.5">
@@ -144,7 +144,7 @@ const RegistrationForm = ({
                 value={form.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-[#1e2757] rounded-lg bg-[#0A0E27] text-white placeholder-gray-500 focus:outline-none focus:border-[#4F75FF] transition"
+                className="w-full px-4 py-3 border border-[#4A2C6D] rounded-lg bg-[#1A0B2E] text-white placeholder-gray-500 focus:outline-none focus:border-[#9D4EDD] transition"
               />
             </div>
 
@@ -160,7 +160,7 @@ const RegistrationForm = ({
                 value={form.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-[#1e2757] rounded-lg bg-[#0A0E27] text-white placeholder-gray-500 focus:outline-none focus:border-[#4F75FF] transition"
+                className="w-full px-4 py-3 border border-[#4A2C6D] rounded-lg bg-[#1A0B2E] text-white placeholder-gray-500 focus:outline-none focus:border-[#9D4EDD] transition"
               />
             </div>
 
@@ -187,25 +187,25 @@ const RegistrationForm = ({
                 inputStyle={{
                   width: "100%",
                   height: "48px",
-                  backgroundColor: "#0A0E27",
-                  border: "1px solid #1e2757",
+                  backgroundColor: "#1A0B2E",
+                  border: "1px solid #4A2C6D",
                   borderRadius: "0.5rem",
                   color: "#ffffff",
                   fontSize: "14px",
                   paddingLeft: "50px",
                 }}
                 buttonStyle={{
-                  backgroundColor: "#0A0E27",
-                  border: "1px solid #1e2757",
+                  backgroundColor: "#1A0B2E",
+                  border: "1px solid #4A2C6D",
                   borderRadius: "0.5rem 0 0 0.5rem",
                 }}
                 dropdownStyle={{
-                  backgroundColor: "#131842",
-                  border: "1px solid #1e2757",
+                  backgroundColor: "#2D1B4E",
+                  border: "1px solid #4A2C6D",
                   color: "#ffffff",
                 }}
                 searchStyle={{
-                  backgroundColor: "#0A0E27",
+                  backgroundColor: "#1A0B2E",
                   color: "#ffffff",
                   borderRadius: "0.5rem",
                 }}
@@ -227,12 +227,12 @@ const RegistrationForm = ({
                   value={form.location || ""}
                   onChange={(e) => setForm({ ...form, location: e.target.value })}
                   required
-                  className="flex-1 px-4 py-3 border border-[#1e2757] rounded-lg bg-[#0A0E27] text-white placeholder-gray-500 focus:outline-none focus:border-[#4F75FF] transition"
+                  className="flex-1 px-4 py-3 border border-[#4A2C6D] rounded-lg bg-[#1A0B2E] text-white placeholder-gray-500 focus:outline-none focus:border-[#9D4EDD] transition"
                 />
                 <button
                   type="button"
                   onClick={detectLocation}
-                  className="px-4 py-3 bg-[#1e2757] hover:bg-[#2a3470] border border-[#2a3470] rounded-lg text-white transition whitespace-nowrap"
+                  className="px-4 py-3 bg-[#4A2C6D] hover:bg-[#5C3A7F] border border-[#5C3A7F] rounded-lg text-white transition whitespace-nowrap"
                 >
                   📍 Detect
                 </button>
@@ -249,15 +249,29 @@ const RegistrationForm = ({
                 value={form.grade}
                 onChange={(e) => setForm({ ...form, grade: e.target.value })}
                 required
-                className="w-full px-4 py-3 border border-[#1e2757] rounded-lg bg-[#0A0E27] text-white focus:outline-none focus:border-[#4F75FF] transition"
+                className="w-full px-4 py-3 border border-[#4A2C6D] rounded-lg bg-[#1A0B2E] text-white focus:outline-none focus:border-[#9D4EDD] transition"
               >
                 <option value="">Select grade</option>
-                <option value="5th">5th Grade</option>
-                <option value="6th">6th Grade</option>
-                <option value="7th">7th Grade</option>
-                <option value="8th">8th Grade</option>
-                <option value="9th">9th Grade</option>
+                <option value="1st">1st Grade</option>
+                <option value="2nd">2nd Grade</option>
+                <option value="3rd">3rd Grade</option>
+                <option value="4th">4th Grade</option>
               </select>
+            </div>
+
+            {/* School Name - Optional */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                School Name <span className="text-gray-500 text-xs">(Optional)</span>
+              </label>
+              <input
+                type="text"
+                name="schoolName"
+                placeholder="Enter your school name"
+                value={form.schoolName || ""}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-[#4A2C6D] rounded-lg bg-[#1A0B2E] text-white placeholder-gray-500 focus:outline-none focus:border-[#9D4EDD] transition"
+              />
             </div>
 
             {/* Batch No */}
@@ -267,7 +281,7 @@ const RegistrationForm = ({
               </label>
               <select
                 name="batchNo"
-                className="w-full px-4 py-3 border border-[#1e2757] rounded-lg bg-[#0A0E27] text-white focus:outline-none focus:border-[#4F75FF] transition"
+                className="w-full px-4 py-3 border border-[#4A2C6D] rounded-lg bg-[#1A0B2E] text-white focus:outline-none focus:border-[#9D4EDD] transition"
                 value={form.batchNo}
                 onChange={handleChange}
               >
@@ -280,14 +294,14 @@ const RegistrationForm = ({
             </div>
 
             {/* Parent Confirmation */}
-            <div className="bg-[#0A0E27] border border-[#1e2757] rounded-lg p-4">
+            <div className="bg-[#1A0B2E] border border-[#4A2C6D] rounded-lg p-4">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   required
                   checked={form.parentConfirmed || false}
                   onChange={(e) => setForm({ ...form, parentConfirmed: e.target.checked })}
-                  className="mt-1 w-4 h-4 text-[#4F75FF] bg-[#0A0E27] border-[#1e2757] rounded focus:ring-[#4F75FF] focus:ring-2"
+                  className="mt-1 w-4 h-4 text-[#9D4EDD] bg-[#1A0B2E] border-[#4A2C6D] rounded focus:ring-[#9D4EDD] focus:ring-2"
                 />
                 <span className="text-sm text-gray-300">
                   I confirm that <strong className="text-white">both parents will be available</strong> with the student for this Family Counselling session <span className="text-red-400">*</span>
@@ -302,7 +316,7 @@ const RegistrationForm = ({
               type="button"
               onClick={() => setShowForm(false)}
               disabled={isSubmitting}
-              className="flex-1 px-6 py-3 border border-[#1e2757] hover:bg-[#1e2757] rounded-lg text-white transition disabled:opacity-50"
+              className="flex-1 px-6 py-3 border border-[#4A2C6D] hover:bg-[#4A2C6D] rounded-lg text-white transition disabled:opacity-50"
             >
               ← Back
             </button>
@@ -317,7 +331,7 @@ const RegistrationForm = ({
                 !form.parentConfirmed ||
                 isSubmitting
               }
-              className="flex-1 px-6 py-3 bg-[#4F75FF] hover:bg-[#6B8FFF] rounded-lg text-white font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-3 bg-[#9D4EDD] hover:bg-[#B565F2] rounded-lg text-white font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ✅ Confirm Booking
             </button>
