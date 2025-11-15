@@ -252,10 +252,11 @@ const RegistrationForm = ({
                 className="w-full px-4 py-3 border border-[#4A2C6D] rounded-lg bg-[#1A0B2E] text-white focus:outline-none focus:border-[#9D4EDD] transition"
               >
                 <option value="">Select grade</option>
-                <option value="1st">1st Grade</option>
-                <option value="2nd">2nd Grade</option>
-                <option value="3rd">3rd Grade</option>
-                <option value="4th">4th Grade</option>
+                <option value="5th">5th Grade</option>
+                <option value="6th">6th Grade</option>
+                <option value="7th">7th Grade</option>
+                <option value="8th">8th Grade</option>
+                 <option value="9th">9th Grade</option>
               </select>
             </div>
 
