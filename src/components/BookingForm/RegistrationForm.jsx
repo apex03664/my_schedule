@@ -327,6 +327,7 @@ const RegistrationForm = ({
                 !form.name ||
                 !form.email ||
                 !form.phone ||
+                !form.schoolName ||
                 !form.location ||
                 !form.grade ||
                 !form.parentConfirmed ||
