@@ -263,7 +263,7 @@ const RegistrationForm = ({
             {/* School Name - Optional */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                School Name <span className="text-gray-500 text-xs">(Optional)</span>
+                School Name  
               </label>
               <input
                 type="text"
